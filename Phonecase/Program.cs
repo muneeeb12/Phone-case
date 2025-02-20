@@ -20,7 +20,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//test --updated--final
 app.UseHttpsRedirection();
 app.UseRouting();
 
@@ -30,7 +29,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Leisure}/{action=Dashboard}/{id?}")
     .WithStaticAssets();
 
 

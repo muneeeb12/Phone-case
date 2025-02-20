@@ -4,7 +4,7 @@ namespace Phonecase.Controllers
 {
     public class LeisureController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Dashboard()
         {
             return View();
         }
