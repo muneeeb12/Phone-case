@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Phonecase.Migrations
 {
     /// <inheritdoc />
-    public partial class ModelsCompleted : Migration
+    public partial class modelschanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,10 +58,9 @@ namespace Phonecase.Migrations
                 {
                     ProductId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ModelId = table.Column<int>(type: "int", nullable: true),
                     CaseManufacturerId = table.Column<int>(type: "int", nullable: true),
-                    Details = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CaseName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

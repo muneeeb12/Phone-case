@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Phonecase.Data;
 
@@ -11,12 +10,10 @@ using Phonecase.Data;
 
 namespace Phonecase.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250220212330_init")]
-    partial class init
+    [DbContext(typeof(PhoneCaseDbContext))]
+    partial class PhoneCaseDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,16 +91,12 @@ namespace Phonecase.Migrations
                     b.Property<int?>("CaseManufacturerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Details")
+                    b.Property<string>("CaseName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ModelId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductId");
 
@@ -173,7 +166,7 @@ namespace Phonecase.Migrations
             modelBuilder.Entity("Phonecase.Models.Payment", b =>
                 {
                     b.HasOne("Phonecase.Models.Vendor", "Vendor")
-                        .WithMany("Payments")
+                        .WithMany()
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -188,7 +181,7 @@ namespace Phonecase.Migrations
                         .HasForeignKey("CaseManufacturerId");
 
                     b.HasOne("Phonecase.Models.Model", "Model")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("ModelId");
 
                     b.Navigation("CaseManufacturer");
@@ -199,13 +192,13 @@ namespace Phonecase.Migrations
             modelBuilder.Entity("Phonecase.Models.Purchase", b =>
                 {
                     b.HasOne("Phonecase.Models.Product", "Product")
-                        .WithMany("Purchases")
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Phonecase.Models.Vendor", "Vendor")
-                        .WithMany("Purchases")
+                        .WithMany()
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -213,23 +206,6 @@ namespace Phonecase.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Vendor");
-                });
-
-            modelBuilder.Entity("Phonecase.Models.Model", b =>
-                {
-                    b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("Phonecase.Models.Product", b =>
-                {
-                    b.Navigation("Purchases");
-                });
-
-            modelBuilder.Entity("Phonecase.Models.Vendor", b =>
-                {
-                    b.Navigation("Payments");
-
-                    b.Navigation("Purchases");
                 });
 #pragma warning restore 612, 618
         }

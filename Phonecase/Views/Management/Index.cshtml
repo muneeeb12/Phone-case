@@ -54,10 +54,10 @@
                         <tbody>
                             @foreach (var company in ViewBag.CaseCompanies) {
                                 <tr>
-                                    <td>@company</td>
+                                    <td>@company.Name</td>
                                     <td>
                                         <form method="post" asp-action="DeleteCaseCompany" class="d-inline">
-                                            <input type="hidden" name="companyName" value="@company" />
+                                            <input type="hidden" name="companyName" value="@company.Name" />
                                             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                                         </form>
                                     </td>
@@ -77,7 +77,7 @@
                         <tbody>
                             @foreach (var modelphone in ViewBag.PhoneModels) {
                                 <tr>
-                                    <td>@modelphone</td>
+                                    <td>@modelphone.Name</td>
                                 </tr>
                             }
                         </tbody>
