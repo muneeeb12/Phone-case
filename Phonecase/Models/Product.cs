@@ -15,7 +15,5 @@ namespace Phonecase.Models
 
         public string CaseName { get; set; }
 
-        // Navigation Property
-        public ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
     }
 }

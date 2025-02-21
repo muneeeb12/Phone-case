@@ -16,8 +16,5 @@ namespace Phonecase.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal TotalCredit { get; set; } = 0.00m;
 
-        // Navigation Properties
-        public ICollection<Purchase> Purchases { get; set; } = new List<Purchase>();
-        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }
