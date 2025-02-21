@@ -3,9 +3,9 @@ using Phonecase.Models;
 
 namespace Phonecase.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class PhoneCaseDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+        public PhoneCaseDbContext(DbContextOptions<PhoneCaseDbContext> options) : base(options) { }
 
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<CaseManufacturer> CaseManufacturers { get; set; }
