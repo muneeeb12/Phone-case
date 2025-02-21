@@ -1,29 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Phonecase.Data;
-using System.Collections.Generic;
 using Phonecase.Models;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
-namespace Phonecase.Controllers
-{
+namespace Phonecase.Controllers {
     public class ManagementController : Controller {
+        private readonly PhoneCaseDbContext _dbContext;
 
-        private readonly PhoneCaseDbContext dbContext;
-        private readonly UserManager<IdentityUser> userManager;
-        // In-memory lists for demo purposes (replace with database in production)
-        private static List<string> CaseCompanies = new List<string>();
-        private static List<string> PhoneModels = new List<string>();
-
-        public ManagementController(
-            PhoneCaseDbContext dbContext,
-            UserManager<IdentityUser> userManager)
-        {
-            this.dbContext = dbContext;
-            this.userManager = userManager;
+        public ManagementController(PhoneCaseDbContext dbContext) {
+            _dbContext = dbContext;
         }
 
         // Action to display the management page
-        public IActionResult Index() {
+        public async Task<IActionResult> Index() {
+            var CaseCompanies = await _dbContext.CaseManufacturers.ToListAsync();
+            var PhoneModels = await _dbContext.Models.ToListAsync();
             ViewBag.CaseCompanies = CaseCompanies;
             ViewBag.PhoneModels = PhoneModels;
             return View();
@@ -31,38 +23,39 @@ namespace Phonecase.Controllers
 
         // Action to add a case company
         [HttpPost]
-        public IActionResult AddCaseCompany (CaseManufacturer companyName) {
-            if (ModelState.IsValid)
-            {
-                var companyname = new CaseManufacturer
-                {
-                    Name = companyName.Name,    
+        public async Task<IActionResult> AddCaseCompany(string companyName) {
+            if (!string.IsNullOrEmpty(companyName)) {
+                var company = new CaseManufacturer {
+                    Name = companyName
                 };
 
-                dbContext.CaseManufacturers.Add(companyName);
-                dbContext.SaveChanges();
+                await _dbContext.CaseManufacturers.AddAsync(company);
+                await _dbContext.SaveChangesAsync();
             }
             return RedirectToAction("Index");
         }
 
         // Action to delete a case company
         [HttpPost]
-        public IActionResult DeleteCaseCompany(string companyName) {
-            CaseCompanies.Remove(companyName);
+        public async Task<IActionResult> DeleteCaseCompany(string companyName) {
+            var company = await _dbContext.CaseManufacturers.FirstOrDefaultAsync(c => c.Name == companyName);
+            if (company != null) {
+                _dbContext.CaseManufacturers.Remove(company);
+                await _dbContext.SaveChangesAsync();
+            }
             return RedirectToAction("Index");
         }
 
         // Action to add a phone model
         [HttpPost]
-        public IActionResult AddPhoneModel(Model modelName) {
-            if (ModelState.IsValid) {
-                var modelname = new Model
-                {
-                    Name = modelName.Name,
+        public async Task<IActionResult> AddPhoneModel(string modelName) {
+            if (!string.IsNullOrEmpty(modelName)) {
+                var model = new Model {
+                    Name = modelName
                 };
-                //PhoneModels.Add(modelName);
-                dbContext.Models.Add(modelName);
-                dbContext.SaveChanges();
+
+                await _dbContext.Models.AddAsync(model);
+                await _dbContext.SaveChangesAsync();
             }
             return RedirectToAction("Index");
         }

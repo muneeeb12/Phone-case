@@ -1,38 +1,48 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Phonecase.Data;
 using Phonecase.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Phonecase.Controllers {
     public class VendorController : Controller {
-        // In-memory list for demo purposes (replace with database in production)
-        private static List<Vendor> Vendors = new List<Vendor>();
+        private readonly PhoneCaseDbContext _context;
+
+        // Inject the DbContext via constructor
+        public VendorController(PhoneCaseDbContext context) {
+            _context = context;
+        }
 
         // Action to display the vendor management page
-        public IActionResult Index() {
-            ViewBag.Vendors = Vendors;
-            return View();
+        public async Task<IActionResult> Index() {
+            var vendors = await _context.Vendors.ToListAsync();
+            return View(vendors); 
         }
 
         // Action to add a new vendor
         [HttpPost]
-        public IActionResult AddVendor(string name, string contactInfo) {
+        public async Task<IActionResult> AddVendor(string name, string contactInfo) {
             if (!string.IsNullOrEmpty(name)) {
-                Vendors.Add(new Vendor {
-                    VendorId = Vendors.Count + 1, // Auto-generate ID (replace with database logic)
+                var vendor = new Vendor {
                     Name = name,
                     ContactInfo = contactInfo,
                     TotalCredit = 0.00m
-                });
+                };
+
+                await _context.Vendors.AddAsync(vendor);
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction("Index");
         }
 
         // Action to delete a vendor
         [HttpPost]
-        public IActionResult DeleteVendor(int vendorId) {
-            var vendor = Vendors.FirstOrDefault(v => v.VendorId == vendorId);
+        public async Task<IActionResult> DeleteVendor(int vendorId) {
+            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
             if (vendor != null) {
-                Vendors.Remove(vendor);
+                _context.Vendors.Remove(vendor);
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction("Index");
         }
