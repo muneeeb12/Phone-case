@@ -15,6 +15,7 @@ namespace Phonecase.Controllers {
             PhoneCaseDbContext dbContext,
             IProductRepository productrepository,
             IManagementRepository managementRepository) {
+
             _dbContext = dbContext;
             _productrepository = productrepository;
             _managementrepository = managementRepository;

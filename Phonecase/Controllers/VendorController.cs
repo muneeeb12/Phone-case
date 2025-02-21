@@ -17,7 +17,7 @@ namespace Phonecase.Controllers {
         // Action to display the vendor management page
         public async Task<IActionResult> Index() {
             var vendors = await _context.Vendors.ToListAsync();
-            return View(vendors); 
+            return View(vendors);
         }
 
         // Action to add a new vendor
@@ -76,6 +76,49 @@ namespace Phonecase.Controllers {
             return View();
         }
 
+        public async Task<IActionResult> PayVendor(int vendorId) {
+            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
+
+            if (vendor == null) {
+                return NotFound("Vendor not found.");
+            }
+
+            ViewBag.Vendor = vendor;
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> PayVendor(int vendorId, decimal amount) {
+            if (amount <= 0) {
+                TempData["Error"] = "Invalid payment amount.";
+                return RedirectToAction("VendorHistory", new { vendorId });
+            }
+
+            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
+            if (vendor == null) {
+                return NotFound("Vendor not found.");
+            }
+
+            if (vendor.TotalCredit < amount) {
+                TempData["Error"] = "Payment amount exceeds the vendor's total credit.";
+                return RedirectToAction("VendorHistory", new { vendorId });
+            }
+
+            var payment = new Payment {
+                VendorId = vendorId,
+                Amount = amount,
+                PaymentDate = DateTime.Now
+            };
+
+            // Deduct payment amount from vendor's credit
+            vendor.TotalCredit -= amount;
+
+            _context.Payments.Add(payment);
+            _context.Vendors.Update(vendor);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Payment recorded successfully.";
+            return RedirectToAction("VendorHistory", new { vendorId });
+        }
 
     }
 }
