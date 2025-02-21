@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Phonecase.Data;
+using Phonecase.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllersWithViews();
 // 🔹 Add Database Context
 builder.Services.AddDbContext<PhoneCaseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICaseManufacturerRepository, SqlCaseManufacturerRepository>();
+
 
 var app = builder.Build();
 
