@@ -15,7 +15,11 @@
             <p><strong>Vendor Name:</strong> @vendor.Name</p>
             <p><strong>Contact Info:</strong> @vendor.ContactInfo</p>
             <p><strong>Total Credit:</strong> $@vendor.TotalCredit</p>
-        </div>
+
+            <a href="@Url.Action("PayVendor", "Vendor", new { vendorId = vendor.VendorId })" class="btn btn-success">
+                <i class="bi bi-cash"></i> Make Payment
+            </a>
+        </div
     </div>
 
     <!-- Purchase History -->
@@ -23,7 +27,7 @@
         <div class="card-header">Purchase History</div>
         <div class="card-body">
             @if (purchaseHistory != null && purchaseHistory.Any()) {
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Product</th>
@@ -60,7 +64,7 @@
         <div class="card-header">Payment History</div>
         <div class="card-body">
             @if (paymentHistory != null && paymentHistory.Any()) {
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Amount</th>
