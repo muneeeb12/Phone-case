@@ -1,0 +1,193 @@
+﻿@{
+    ViewData["Title"] = "Record Purchase";
+}
+
+<div class="container mt-3">
+    <h1>Record Purchase</h1>
+
+    <!-- Record Purchase Form -->
+    <div class="card mb-4">
+        <div class="card-header">Record Purchase</div>
+        <div class="card-body">
+            <form method="post" asp-action="SavePurchase" id="purchaseForm">
+                <!-- Vendor Dropdown -->
+                <div class="mb-3">
+                    <label class="form-label">Select Vendor</label>
+                    <select class="form-control" name="vendorId" id="vendorId" required>
+                        <option value="">Select Vendor</option>
+                        @foreach (var vendor in ViewBag.Vendors)
+                        {
+                            <option value="@vendor.VendorId">@vendor.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Add Items Section -->
+                <div id="itemsSection">
+                    <div class="item mb-3 border p-3">
+                        <div class="mb-3">
+                            <label class="form-label">Select Product</label>
+                            <select class="form-control product-select" name="productIds[]" required>
+                                <option value="">Select Product</option>
+                                @foreach (var product in ViewBag.Products)
+                                {
+                                    <option value="@product.ProductId">@product.CaseName (@product.Model.Name - @product.CaseManufacturer.Name)</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-secondary mt-2 add-product">+ Add New Product</button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control quantity" name="quantities[]" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Unit Price</label>
+                            <input type="number" step="0.01" class="form-control unit-price" name="unitPrices[]" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Total Price</label>
+                            <input type="text" class="form-control total-price" readonly>
+                        </div>
+                        <button type="button" class="btn btn-danger remove-item">Remove</button>
+                    </div>
+                </div>
+
+                <!-- Add Another Item Button -->
+                <button type="button" class="btn btn-secondary mb-3" id="addItem">+ Add Another Item</button>
+
+                <!-- Purchase Summary -->
+                <div class="mb-3">
+                    <h5>Purchase Summary</h5>
+                    <p>Items: <span id="itemCount">0</span></p>
+                    <p>Subtotal: $<span id="subtotal">0.00</span></p>
+                </div>
+
+                <!-- Save Purchase Button -->
+                <button type="submit" class="btn btn-primary">Save Purchase</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding New Product -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label class="form-label">Case Name</label>
+                        <input type="text" class="form-control" id="caseName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Model</label>
+                        <select class="form-control" id="modelId" required>
+                            <option value="">Select Phone Model</option>
+                            @foreach (var modelphone in ViewBag.Models)
+                            {
+                                <option value="@modelphone.ModelId">@modelphone.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Case Manufacturer</label>
+                        <select class="form-control" id="caseManufacturerId" required>
+                            <option value="">Select Case Manufacturer</option>
+                            @foreach (var manufacturer in ViewBag.CaseManufacturers)
+                            {
+                                <option value="@manufacturer.CaseManufacturerId">@manufacturer.Name</option>
+                            }
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveProduct">Save Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script for Dynamic Form Handling -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Add new item
+        $("#addItem").click(function () {
+            var newItem = $(".item").first().clone();
+            newItem.find("input").val("");
+            newItem.find("select").val("");
+            newItem.find(".total-price").val("0.00");
+            $("#itemsSection").append(newItem);
+            updateSummary();
+        });
+
+        // Remove item
+        $(document).on("click", ".remove-item", function () {
+            if ($(".item").length > 1) {
+                $(this).closest(".item").remove();
+                updateSummary();
+            }
+        });
+
+        // Open modal to add new product
+        $(document).on("click", ".add-product", function () {
+            $("#addProductModal").modal("show");
+        });
+
+        // Save new product
+        $("#saveProduct").click(function () {
+            var caseName = $("#caseName").val();
+            var modelId = $("#modelId").val();
+            var caseManufacturerId = $("#caseManufacturerId").val();
+
+            if (caseName && modelId && caseManufacturerId) {
+                $.ajax({
+                    url: "/Record/AddProduct",
+                    type: "POST",
+                    data: {
+                        caseName: caseName,
+                        modelId: modelId,
+                        caseManufacturerId: caseManufacturerId
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // Add the new product to the dropdown
+                            var newOption = `<option value="${response.productId}">${response.caseName}</option>`;
+                            $(".product-select").append(newOption);
+                            $("#addProductModal").modal("hide");
+                        }
+                    }
+                });
+            }
+        });
+
+        // Calculate total price
+        $(document).on("input", ".quantity, .unit-price", function () {
+            var item = $(this).closest(".item");
+            var quantity = parseFloat(item.find(".quantity").val()) || 0;
+            var unitPrice = parseFloat(item.find(".unit-price").val()) || 0;
+            var totalPrice = quantity * unitPrice;
+            item.find(".total-price").val(totalPrice.toFixed(2));
+            updateSummary();
+        });
+
+        // Update purchase summary
+        function updateSummary() {
+            var itemCount = $(".item").length;
+            var subtotal = 0;
+            $(".item").each(function () {
+                var totalPrice = parseFloat($(this).find(".total-price").val()) || 0;
+                subtotal += totalPrice;
+            });
+            $("#itemCount").text(itemCount);
+            $("#subtotal").text(subtotal.toFixed(2));
+        }
+    });
+</script>

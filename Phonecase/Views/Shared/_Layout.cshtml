@@ -37,8 +37,18 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Vendor" asp-action="Index">Vendor</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Vendor
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Vendor" asp-action="Index">Add/Remove</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="" asp-action="">View History</a>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
                 </div>

@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Vendor History";
+    var vendor = ViewBag.Vendor as Phonecase.Models.Vendor;
+    var purchaseHistory = ViewBag.PurchaseHistory as List<Phonecase.Models.Purchase>;
+    var paymentHistory = ViewBag.PaymentHistory as List<Phonecase.Models.Payment>;
+}
+
+<div class="container mt-3">
+    <h1>Vendor History: @vendor.Name</h1>
+
+    <!-- Vendor Details -->
+    <div class="card mb-4">
+        <div class="card-header">Vendor Information</div>
+        <div class="card-body">
+            <p><strong>Vendor Name:</strong> @vendor.Name</p>
+            <p><strong>Contact Info:</strong> @vendor.ContactInfo</p>
+            <p><strong>Total Credit:</strong> $@vendor.TotalCredit</p>
+        </div>
+    </div>
+
+    <!-- Purchase History -->
+    <div class="card mb-4">
+        <div class="card-header">Purchase History</div>
+        <div class="card-body">
+            @if (purchaseHistory != null && purchaseHistory.Any()) {
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Model</th>
+                            <th>Manufacturer</th>
+                            <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Total Price</th>
+                            <th>Purchase Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var purchase in purchaseHistory) {
+                            <tr>
+                                <td>@purchase.Product?.CaseName</td>
+                                <td>@purchase.Product?.Model?.Name</td>
+                                <td>@purchase.Product?.CaseManufacturer?.Name</td>
+                                <td>@purchase.Quantity</td>
+                                <td>$@purchase.UnitPrice</td>
+                                <td>$@(purchase.Quantity * purchase.UnitPrice)</td>
+                                <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            } else {
+                <p class="text-muted">No purchases found for this vendor.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Payment History -->
+    <div class="card mb-4">
+        <div class="card-header">Payment History</div>
+        <div class="card-body">
+            @if (paymentHistory != null && paymentHistory.Any()) {
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Amount</th>
+                            <th>Payment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in paymentHistory) {
+                            <tr>
+                                <td>$@payment.Amount</td>
+                                <td>@payment.PaymentDate.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            } else {
+                <p class="text-muted">No payments found for this vendor.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Back to Vendor List -->
+    <a asp-action="Index" class="btn btn-secondary">Back to Vendor List</a>
+</div>
