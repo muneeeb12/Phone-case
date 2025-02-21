@@ -15,7 +15,7 @@ namespace Phonecase.Controllers {
         // Action to display the management page
         public async Task<IActionResult> Index() {
             var CaseCompanies = await _dbContext.CaseManufacturers.ToListAsync();
-            var PhoneModels = await _dbContext.Models.ToListAsync();
+            var PhoneModels = await _dbContext.PhoneModels.ToListAsync();
             ViewBag.CaseCompanies = CaseCompanies;
             ViewBag.PhoneModels = PhoneModels;
             return View();
@@ -50,11 +50,11 @@ namespace Phonecase.Controllers {
         [HttpPost]
         public async Task<IActionResult> AddPhoneModel(string modelName) {
             if (!string.IsNullOrEmpty(modelName)) {
-                var model = new Model {
+                var model = new PhoneModel {
                     Name = modelName
                 };
 
-                await _dbContext.Models.AddAsync(model);
+                await _dbContext.PhoneModels.AddAsync(model);
                 await _dbContext.SaveChangesAsync();
             }
             return RedirectToAction("Index");

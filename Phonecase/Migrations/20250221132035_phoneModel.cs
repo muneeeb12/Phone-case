@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Phonecase.Migrations
 {
     /// <inheritdoc />
-    public partial class modelschanges : Migration
+    public partial class phoneModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +25,7 @@ namespace Phonecase.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Models",
+                name: "PhoneModels",
                 columns: table => new
                 {
                     ModelId = table.Column<int>(type: "int", nullable: false)
@@ -34,7 +34,7 @@ namespace Phonecase.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Models", x => x.ModelId);
+                    table.PrimaryKey("PK_PhoneModels", x => x.ModelId);
                 });
 
             migrationBuilder.CreateTable(
@@ -71,9 +71,9 @@ namespace Phonecase.Migrations
                         principalTable: "CaseManufacturers",
                         principalColumn: "CaseManufacturerId");
                     table.ForeignKey(
-                        name: "FK_Products_Models_ModelId",
+                        name: "FK_Products_PhoneModels_ModelId",
                         column: x => x.ModelId,
-                        principalTable: "Models",
+                        principalTable: "PhoneModels",
                         principalColumn: "ModelId");
                 });
 
@@ -172,7 +172,7 @@ namespace Phonecase.Migrations
                 name: "CaseManufacturers");
 
             migrationBuilder.DropTable(
-                name: "Models");
+                name: "PhoneModels");
         }
     }
 }

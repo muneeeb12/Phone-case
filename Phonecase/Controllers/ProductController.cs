@@ -21,7 +21,7 @@ namespace Phonecase.Controllers {
                 .ToListAsync();
 
             // Fetch models and case manufacturers for dropdowns
-            ViewBag.Models = await _dbContext.Models.ToListAsync();
+            ViewBag.Models = await _dbContext.PhoneModels.ToListAsync();
             ViewBag.CaseManufacturers = await _dbContext.CaseManufacturers.ToListAsync();
 
             return View(products);

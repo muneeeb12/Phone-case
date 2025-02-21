@@ -12,8 +12,8 @@ using Phonecase.Data;
 namespace Phonecase.Migrations
 {
     [DbContext(typeof(PhoneCaseDbContext))]
-    [Migration("20250221105127_models-changes")]
-    partial class modelschanges
+    [Migration("20250221132035_phoneModel")]
+    partial class phoneModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,23 +42,6 @@ namespace Phonecase.Migrations
                     b.ToTable("CaseManufacturers");
                 });
 
-            modelBuilder.Entity("Phonecase.Models.Model", b =>
-                {
-                    b.Property<int>("ModelId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModelId"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ModelId");
-
-                    b.ToTable("Models");
-                });
-
             modelBuilder.Entity("Phonecase.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -81,6 +64,23 @@ namespace Phonecase.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("Phonecase.Models.PhoneModel", b =>
+                {
+                    b.Property<int>("ModelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModelId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ModelId");
+
+                    b.ToTable("PhoneModels");
                 });
 
             modelBuilder.Entity("Phonecase.Models.Product", b =>
@@ -183,7 +183,7 @@ namespace Phonecase.Migrations
                         .WithMany()
                         .HasForeignKey("CaseManufacturerId");
 
-                    b.HasOne("Phonecase.Models.Model", "Model")
+                    b.HasOne("Phonecase.Models.PhoneModel", "Model")
                         .WithMany()
                         .HasForeignKey("ModelId");
 
