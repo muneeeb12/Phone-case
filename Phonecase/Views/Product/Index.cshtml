@@ -54,7 +54,6 @@
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>Product ID</th>
                         <th>Model</th>
                         <th>Case Manufacturer</th>
                         <th>Case Name</th>
@@ -66,7 +65,6 @@
                         foreach (var product in Model)
                         {
                             <tr>
-                                <td>@product.ProductId</td>
                                 <td>@product.Model?.Name</td>
                                 <td>@product.CaseManufacturer?.Name</td>
                                 <td>@product.CaseName</td>
