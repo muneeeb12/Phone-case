@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "Management";
+}
+
+<div class="container mt-5">
+    <h2>Management</h2>
+
+    <!-- Add Case Company Form -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Add Case Company</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="AddCaseCompany">
+                <div class="form-group">
+                    <label for="companyName">Company Name</label>
+                    <input type="text" class="form-control" id="companyName" name="companyName" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add Company</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Case Company Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="card-title mb-0">Delete Case Company</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var company in ViewBag.CaseCompanies)
+                    {
+                        <tr>
+                            <td>@company</td>
+                            <td>
+                                <form method="post" asp-action="DeleteCaseCompany">
+                                    <input type="hidden" name="companyName" value="@company" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Phone Model Form -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0">Add Phone Model</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-action="AddPhoneModel">
+                <div class="form-group">
+                    <label for="modelName">Model Name</label>
+                    <input type="text" class="form-control" id="modelName" name="modelName" required>
+                </div>
+                <button type="submit" class="btn btn-success">Add Model</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- List of Phone Models -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0">Phone Models</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                @foreach (var modelm in ViewBag.PhoneModels)
+                {
+                    <li class="list-group-item">@modelm</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
