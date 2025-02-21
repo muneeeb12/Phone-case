@@ -21,13 +21,17 @@ namespace Phonecase.Controllers {
         }
 
         // Action to display the product management page
-        public async Task<IActionResult> Index() {
-            // Fetch products with related data
+        [HttpGet]
+        public async Task<IActionResult> Index(int? id)
+        {
             var products = await _productrepository.GetAllAsync();
-
-            // Fetch models and case manufacturers for dropdowns
             ViewBag.Models = await _managementrepository.GetAllModelAsync();
             ViewBag.CaseManufacturers = await _managementrepository.GetAllCompanyAsync();
+
+            if (id.HasValue)
+            {
+                ViewBag.EditProduct = await _productrepository.GetProductByIdAsync(id.Value);
+            }
 
             return View(products);
         }
@@ -45,6 +49,67 @@ namespace Phonecase.Controllers {
                 await _productrepository.CreateProductAsync(product);
                 
             }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateProduct(int id, int modelId, int caseManufacturerId, string caseName)
+        {
+            if (id <= 0 || modelId <= 0 || caseManufacturerId <= 0 || string.IsNullOrEmpty(caseName))
+            {
+                return BadRequest("Invalid product data.");
+            }
+
+            var existingProduct = await _productrepository.GetProductByIdAsync(id);
+            if (existingProduct == null)
+            {
+                return NotFound("Product not found.");
+            }
+
+            existingProduct.ModelId = modelId;
+            existingProduct.CaseManufacturerId = caseManufacturerId;
+            existingProduct.CaseName = caseName;
+
+            await _productrepository.UpdateProductAsync(existingProduct);
+
+            return Ok("Product updated successfully.");
+        }
+        [HttpPost]
+        public async Task<IActionResult> SaveProduct(int? ProductId, int ModelId, int CaseManufacturerId, string CaseName)
+        {
+            if (ModelId <= 0 || CaseManufacturerId <= 0 || string.IsNullOrEmpty(CaseName))
+            {
+                return BadRequest("Invalid product data.");
+            }
+
+            if (ProductId.HasValue && ProductId > 0)
+            {
+                // Update existing product
+                var existingProduct = await _productrepository.GetProductByIdAsync(ProductId.Value);
+                if (existingProduct == null)
+                {
+                    return NotFound("Product not found.");
+                }
+
+                existingProduct.ModelId = ModelId;
+                existingProduct.CaseManufacturerId = CaseManufacturerId;
+                existingProduct.CaseName = CaseName;
+
+                await _productrepository.UpdateProductAsync(existingProduct);
+            }
+            else
+            {
+                // Create new product
+                var newProduct = new Product
+                {
+                    ModelId = ModelId,
+                    CaseManufacturerId = CaseManufacturerId,
+                    CaseName = CaseName
+                };
+
+                await _productrepository.CreateProductAsync(newProduct);
+            }
+
             return RedirectToAction("Index");
         }
     }

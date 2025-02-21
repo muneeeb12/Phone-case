@@ -2,47 +2,59 @@
 
 @{
     ViewData["Title"] = "Product Management";
+    var editProduct = ViewBag.EditProduct as Phonecase.Models.Product;
 }
 
 <div class="container mt-3">
     <h1>Product Management</h1>
 
-    <!-- Add Product Form -->
+    <!-- Add/Edit Product Form -->
     <div class="card mb-4">
-        <div class="card-header">Add New Product</div>
+        <div class="card-header">@(editProduct != null ? "Edit Product" : "Add New Product")</div>
         <div class="card-body">
-            <form method="post" asp-action="AddProduct">
+            <form method="post" asp-action="SaveProduct">
+                <input type="hidden" name="ProductId" value="@editProduct?.ProductId" />
+
                 <div class="mb-3">
                     <label class="form-label">Model</label>
-                    <select class="form-control" name="modelId" required>
+                    <select class="form-control" name="ModelId" required>
                         <option value="">Select Model</option>
                         @if (ViewBag.Models != null)
                         {
                             foreach (var modelphone in ViewBag.Models)
                             {
-                                <option value="@modelphone.ModelId">@modelphone.Name</option>
+                                <option value="@modelphone.ModelId" selected="@(editProduct?.ModelId == modelphone.ModelId ? "selected" : null)">
+                                    @modelphone.Name
+                                </option>
                             }
                         }
                     </select>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Case Manufacturer</label>
-                    <select class="form-control" name="caseManufacturerId" required>
+                    <select class="form-control" name="CaseManufacturerId" required>
                         <option value="">Select Case Manufacturer</option>
                         @if (ViewBag.CaseManufacturers != null)
                         {
                             foreach (var manufacturer in ViewBag.CaseManufacturers)
                             {
-                                <option value="@manufacturer.CaseManufacturerId">@manufacturer.Name</option>
+                                <option value="@manufacturer.CaseManufacturerId" selected="@(editProduct?.CaseManufacturerId == manufacturer.CaseManufacturerId ? "selected" : null)">
+                                    @manufacturer.Name
+                                </option>
                             }
                         }
                     </select>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Case Name</label>
-                    <input type="text" class="form-control" name="caseName" required>
+                    <input type="text" class="form-control" name="CaseName" value="@editProduct?.CaseName" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Product</button>
+
+                <button type="submit" class="btn btn-primary">
+                    @(editProduct != null ? "Update Product" : "Add Product")
+                </button>
             </form>
         </div>
     </div>
@@ -57,6 +69,7 @@
                         <th>Model</th>
                         <th>Case Manufacturer</th>
                         <th>Case Name</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,6 +81,11 @@
                                 <td>@product.Model?.Name</td>
                                 <td>@product.CaseManufacturer?.Name</td>
                                 <td>@product.CaseName</td>
+                                <td>
+                                    <a asp-action="Index" asp-route-id="@product.ProductId" class="btn btn-primary btn-sm">
+                                        Edit
+                                    </a>
+                                </td>
                             </tr>
                         }
                     }
