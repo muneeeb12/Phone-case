@@ -2,21 +2,22 @@
     ViewData["Title"] = "Record Purchase";
 }
 
-<div class="container mt-3">
-    <h1>Record Purchase</h1>
+<div class="container mt-5">
+    <h1 class="mb-4 text-primary">Record Purchase</h1>
 
     <!-- Record Purchase Form -->
-    <div class="card mb-4">
-        <div class="card-header">Record Purchase</div>
-        <div class="card-body">
+    <div class="card shadow mb-5">
+        <div class="card-header bg-light py-3">
+            <h4 class="mb-0">Record Purchase</h4>
+        </div>
+        <div class="card-body p-4">
             <form method="post" asp-action="SavePurchase" id="purchaseForm">
                 <!-- Vendor Dropdown -->
-                <div class="mb-3">
-                    <label class="form-label">Select Vendor</label>
-                    <select class="form-control" name="vendorId" id="vendorId" required>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Select Vendor</label>
+                    <select class="form-control form-control-lg shadow-sm" name="vendorId" id="vendorId" required>
                         <option value="">Select Vendor</option>
-                        @foreach (var vendor in ViewBag.Vendors)
-                        {
+                        @foreach (var vendor in ViewBag.Vendors) {
                             <option value="@vendor.VendorId">@vendor.Name</option>
                         }
                     </select>
@@ -24,46 +25,66 @@
 
                 <!-- Add Items Section -->
                 <div id="itemsSection">
-                    <div class="item mb-3 border p-3">
-                        <div class="mb-3">
-                            <label class="form-label">Select Product</label>
-                            <select class="form-control product-select" name="productIds[]" required>
-                                <option value="">Select Product</option>
-                                @foreach (var product in ViewBag.Products)
-                                {
-                                    <option value="@product.ProductId">@product.CaseName (@product.Model.Name - @product.CaseManufacturer.Name)</option>
-                                }
-                            </select>
-                            <button type="button" class="btn btn-secondary mt-2 add-product">+ Add New Product</button>
+                    <div class="item mb-4 border p-4 rounded shadow-sm">
+                        <div class="row g-3">
+                            <!-- Product Dropdown -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Select Product</label>
+                                <select class="form-control form-control-lg shadow-sm product-select" name="productIds[]" required>
+                                    <option value="">Select Product</option>
+                                    @foreach (var product in ViewBag.Products) {
+                                        <option value="@product.ProductId">@product.CaseName (@product.Model.Name - @product.CaseManufacturer.Name)</option>
+                                    }
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-lg w-100 mt-3 add-product">
+                                    <i class="bi bi-plus-circle me-2"></i>Add New Product
+                                </button>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Quantity</label>
+                                <input type="number" class="form-control form-control-lg shadow-sm quantity" name="quantities[]" required>
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Unit Price</label>
+                                <input type="number" step="0.01" class="form-control form-control-lg shadow-sm unit-price" name="unitPrices[]" required>
+                            </div>
+
+                            <!-- Total Price -->
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Total Price</label>
+                                <input type="text" class="form-control form-control-lg shadow-sm total-price" readonly>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" class="form-control quantity" name="quantities[]" required>
+
+                        <!-- Remove Button -->
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-danger btn-sm remove-item">
+                                <i class="bi bi-trash me-2"></i>Remove
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Unit Price</label>
-                            <input type="number" step="0.01" class="form-control unit-price" name="unitPrices[]" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Total Price</label>
-                            <input type="text" class="form-control total-price" readonly>
-                        </div>
-                        <button type="button" class="btn btn-danger remove-item">Remove</button>
                     </div>
                 </div>
 
                 <!-- Add Another Item Button -->
-                <button type="button" class="btn btn-secondary mb-3" id="addItem">+ Add Another Item</button>
+                <button type="button" class="btn btn-secondary btn-lg w-100 mb-4" id="addItem">
+                    <i class="bi bi-plus-circle me-2"></i>Add Another Item
+                </button>
 
                 <!-- Purchase Summary -->
-                <div class="mb-3">
-                    <h5>Purchase Summary</h5>
-                    <p>Items: <span id="itemCount">0</span></p>
-                    <p>Subtotal: $<span id="subtotal">0.00</span></p>
+                <div class="mb-4 p-4 bg-light rounded shadow-sm">
+                    <h5 class="fw-bold">Purchase Summary</h5>
+                    <p class="mb-1">Items: <span id="itemCount">0</span></p>
+                    <p class="mb-0">Subtotal: $<span id="subtotal">0.00</span></p>
                 </div>
 
                 <!-- Save Purchase Button -->
-                <button type="submit" class="btn btn-primary">Save Purchase</button>
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-save me-2"></i>Save Purchase
+                </button>
             </form>
         </div>
     </div>
@@ -73,45 +94,46 @@
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold" id="addProductModalLabel">Add New Product</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addProductForm">
-                    <div class="mb-3">
-                        <label class="form-label">Case Name</label>
-                        <input type="text" class="form-control" id="caseName" required>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Case Name</label>
+                        <input type="text" class="form-control form-control-lg shadow-sm" id="caseName" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Phone Model</label>
-                        <select class="form-control" id="modelId" required>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Phone Model</label>
+                        <select class="form-control form-control-lg shadow-sm" id="modelId" required>
                             <option value="">Select Phone Model</option>
-                            @foreach (var modelphone in ViewBag.Models)
-                            {
+                            @foreach (var modelphone in ViewBag.Models) {
                                 <option value="@modelphone.ModelId">@modelphone.Name</option>
                             }
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Case Manufacturer</label>
-                        <select class="form-control" id="caseManufacturerId" required>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Case Manufacturer</label>
+                        <select class="form-control form-control-lg shadow-sm" id="caseManufacturerId" required>
                             <option value="">Select Case Manufacturer</option>
-                            @foreach (var manufacturer in ViewBag.CaseManufacturers)
-                            {
+                            @foreach (var manufacturer in ViewBag.CaseManufacturers) {
                                 <option value="@manufacturer.CaseManufacturerId">@manufacturer.Name</option>
                             }
                         </select>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveProduct">Save Product</button>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-lg" id="saveProduct">Save Product</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
 
 <!-- Script for Dynamic Form Handling -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

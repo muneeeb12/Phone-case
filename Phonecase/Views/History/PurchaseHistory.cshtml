@@ -1,0 +1,94 @@
+﻿@{
+    ViewData["Title"] = "Purchase History";
+    var purchaseHistory = Model as List<Phonecase.Models.Purchase>;
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4 text-primary">Purchase History</h1>
+
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light py-3">
+            <h4 class="mb-0">Filter Purchase History</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" asp-action="PurchaseHistory">
+                <div class="row g-3">
+                    <!-- Vendor Dropdown -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Select Vendor</label>
+                        <select class="form-control form-control-lg shadow-sm" name="vendorId" required>
+                            <option value="">Select Vendor</option>
+                            @foreach (var vendor in ViewBag.Vendors) {
+                                <option value="@vendor.VendorId" selected="@(ViewBag.SelectedVendor == vendor.VendorId ? "selected" : null)">
+                                    @vendor.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Time Filter -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Filter by</label>
+                        <select class="form-control form-control-lg shadow-sm" name="filter">
+                            <option value="all" selected="@(ViewBag.SelectedFilter == "all" ? "selected" : null)">All Time</option>
+                            <option value="week" selected="@(ViewBag.SelectedFilter == "week" ? "selected" : null)">Last Week</option>
+                            <option value="month" selected="@(ViewBag.SelectedFilter == "month" ? "selected" : null)">Last Month</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Purchase History Table -->
+    @if (purchaseHistory != null && purchaseHistory.Any()) {
+        <div class="card shadow mb-4">
+            <div class="card-header bg-light py-3">
+                <h4 class="mb-0">Purchase Records</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Model</th>
+                                <th>Manufacturer</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                                <th>Purchase Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var purchase in purchaseHistory) {
+                                <tr>
+                                    <td>@purchase.Product?.CaseName</td>
+                                    <td>@purchase.Product?.Model?.Name</td>
+                                    <td>@purchase.Product?.CaseManufacturer?.Name</td>
+                                    <td>@purchase.Quantity</td>
+                                    <td>Rs.@purchase.UnitPrice</td>
+                                    <td>Rs.@(purchase.Quantity * purchase.UnitPrice)</td>
+                                    <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    } else {
+        <p class="text-muted">No purchases found for this vendor in the selected time frame.</p>
+    }
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
