@@ -8,7 +8,7 @@ namespace Phonecase.Models
         public int ProductId { get; set; }
 
         public int? ModelId { get; set; }
-        public Model Model { get; set; }  // Navigation Property
+        public PhoneModel Model { get; set; }  // Navigation Property
 
         public int? CaseManufacturerId { get; set; }
         public CaseManufacturer CaseManufacturer { get; set; }  // Navigation Property

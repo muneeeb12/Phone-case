@@ -2,7 +2,7 @@
 
 namespace Phonecase.Models
 {
-    public class Model
+    public class PhoneModel
     {
         [Key]
         public int ModelId { get; set; }
