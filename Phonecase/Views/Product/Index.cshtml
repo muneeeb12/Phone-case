@@ -1,0 +1,80 @@
+﻿@model List<Phonecase.Models.Product>
+
+@{
+    ViewData["Title"] = "Product Management";
+}
+
+<div class="container mt-3">
+    <h1>Product Management</h1>
+
+    <!-- Add Product Form -->
+    <div class="card mb-4">
+        <div class="card-header">Add New Product</div>
+        <div class="card-body">
+            <form method="post" asp-action="AddProduct">
+                <div class="mb-3">
+                    <label class="form-label">Model</label>
+                    <select class="form-control" name="modelId" required>
+                        <option value="">Select Model</option>
+                        @if (ViewBag.Models != null)
+                        {
+                            foreach (var modelphone in ViewBag.Models)
+                            {
+                                <option value="@modelphone.ModelId">@modelphone.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Case Manufacturer</label>
+                    <select class="form-control" name="caseManufacturerId" required>
+                        <option value="">Select Case Manufacturer</option>
+                        @if (ViewBag.CaseManufacturers != null)
+                        {
+                            foreach (var manufacturer in ViewBag.CaseManufacturers)
+                            {
+                                <option value="@manufacturer.CaseManufacturerId">@manufacturer.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Case Name</label>
+                    <input type="text" class="form-control" name="caseName" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Product</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product List -->
+    <div class="card">
+        <div class="card-header">Products</div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Model</th>
+                        <th>Case Manufacturer</th>
+                        <th>Case Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null)
+                    {
+                        foreach (var product in Model)
+                        {
+                            <tr>
+                                <td>@product.ProductId</td>
+                                <td>@product.Model?.Name</td>
+                                <td>@product.CaseManufacturer?.Name</td>
+                                <td>@product.CaseName</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
