@@ -54,11 +54,15 @@ namespace Phonecase.Controllers
 
         // Action to add a phone model
         [HttpPost]
-        public IActionResult AddPhoneModel(string modelName) {
-            if (!string.IsNullOrEmpty(modelName)) {
-                PhoneModels.Add(modelName);
-                //dbContext.Models.Add(modelName);
-                //dbContext.SaveChanges();
+        public IActionResult AddPhoneModel(Model modelName) {
+            if (ModelState.IsValid) {
+                var modelname = new Model
+                {
+                    Name = modelName.Name,
+                };
+                //PhoneModels.Add(modelName);
+                dbContext.Models.Add(modelName);
+                dbContext.SaveChanges();
             }
             return RedirectToAction("Index");
         }
