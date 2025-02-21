@@ -2,27 +2,32 @@
 using Microsoft.EntityFrameworkCore;
 using Phonecase.Data;
 using Phonecase.Models;
+using Phonecase.Repositories;
 using System.Threading.Tasks;
 
 namespace Phonecase.Controllers {
     public class ProductController : Controller {
         private readonly PhoneCaseDbContext _dbContext;
+        private readonly IProductRepository _productrepository;
+        private readonly IManagementRepository _managementrepository;
 
-        public ProductController(PhoneCaseDbContext dbContext) {
+        public ProductController(
+            PhoneCaseDbContext dbContext,
+            IProductRepository productrepository,
+            IManagementRepository managementRepository) {
             _dbContext = dbContext;
+            _productrepository = productrepository;
+            _managementrepository = managementRepository;
         }
 
         // Action to display the product management page
         public async Task<IActionResult> Index() {
             // Fetch products with related data
-            var products = await _dbContext.Products
-                .Include(p => p.Model)
-                .Include(p => p.CaseManufacturer)
-                .ToListAsync();
+            var products = await _productrepository.GetAllAsync();
 
             // Fetch models and case manufacturers for dropdowns
-            ViewBag.Models = await _dbContext.PhoneModels.ToListAsync();
-            ViewBag.CaseManufacturers = await _dbContext.CaseManufacturers.ToListAsync();
+            ViewBag.Models = await _managementrepository.GetAllModelAsync();
+            ViewBag.CaseManufacturers = await _managementrepository.GetAllCompanyAsync();
 
             return View(products);
         }
@@ -37,8 +42,8 @@ namespace Phonecase.Controllers {
                     CaseName = caseName
                 };
 
-                await _dbContext.Products.AddAsync(product);
-                await _dbContext.SaveChangesAsync();
+                await _productrepository.CreateProductAsync(product);
+                
             }
             return RedirectToAction("Index");
         }

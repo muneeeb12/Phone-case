@@ -12,6 +12,7 @@ builder.Services.AddDbContext<PhoneCaseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IManagementRepository, SqlManagementRepository>();
+builder.Services.AddScoped<IProductRepository, SqlProductRepositoy>();
 
 
 var app = builder.Build();
