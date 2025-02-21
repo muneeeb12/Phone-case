@@ -7,8 +7,13 @@
 <div class="container mt-3">
     <h1>Vendor Management</h1>
 
-    <!-- Add Vendor Form -->
-    <div class="card mb-4">
+    <!-- Toggle Add Vendor Form -->
+    <button class="btn btn-primary mb-3" type="button" onclick="toggleVendorForm()">
+        Add New Vendor
+    </button>
+
+    <!-- Add Vendor Form (Hidden by Default) -->
+    <div class="card mb-4" id="vendorForm" style="display: none;">
         <div class="card-header">Add New Vendor</div>
         <div class="card-body">
             <form method="post" asp-action="AddVendor">
@@ -35,7 +40,7 @@
                         <th>Name</th>
                         <th>Contact Info</th>
                         <th>Total Credit</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,18 +50,14 @@
                             <td>@vendor.ContactInfo</td>
                             <td>@vendor.TotalCredit.ToString("C")</td>
                             <td>
-                                <form method="post" asp-action="DeleteVendor" onsubmit="return confirmDelete()">
+                                <a href="@Url.Action("VendorHistory", "Vendor", new { vendorId = vendor.VendorId })" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-clock-history"></i> View History
+                                </a>
+                                <form method="post" asp-action="DeleteVendor" onsubmit="return confirmDelete()" style="display: inline-block;">
                                     <input type="hidden" name="vendorId" value="@vendor.VendorId" />
                                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                 </form>
                             </td>
-                            <td>
-                                <a href="@Url.Action("VendorHistory", "Vendor", new { vendorId = vendor.VendorId })"
-                                   class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-clock-history"></i> View History
-                                </a>
-                            </td>
-
                         </tr>
                     }
                 </tbody>
@@ -65,8 +66,13 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Script -->
+<!-- JavaScript for Toggle & Delete Confirmation -->
 <script>
+    function toggleVendorForm() {
+        var form = document.getElementById("vendorForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
     function confirmDelete() {
         return confirm("Are you sure you want to delete this vendor?");
     }
