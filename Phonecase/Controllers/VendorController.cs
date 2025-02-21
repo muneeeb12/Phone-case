@@ -46,5 +46,36 @@ namespace Phonecase.Controllers {
             }
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> VendorHistory(int vendorId) {
+            var vendor = await _context.Vendors
+                .FirstOrDefaultAsync(v => v.VendorId == vendorId);
+
+            if (vendor == null) {
+                return NotFound("Vendor not found.");
+            }
+
+            var purchaseHistory = await _context.Purchases
+                .Where(p => p.VendorId == vendorId)
+                .Include(p => p.Product)
+                .ThenInclude(m => m.Model)
+                .Include(p => p.Product)
+                .ThenInclude(cm => cm.CaseManufacturer)
+                .OrderByDescending(p => p.PurchaseDate)
+                .ToListAsync();
+
+            var paymentHistory = await _context.Payments
+                .Where(p => p.VendorId == vendorId)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
+
+            ViewBag.Vendor = vendor;
+            ViewBag.PurchaseHistory = purchaseHistory;
+            ViewBag.PaymentHistory = paymentHistory;
+
+            return View();
+        }
+
+
     }
 }

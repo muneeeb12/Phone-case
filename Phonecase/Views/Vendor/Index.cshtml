@@ -32,7 +32,6 @@
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
-                        <th>Vendor ID</th>
                         <th>Name</th>
                         <th>Contact Info</th>
                         <th>Total Credit</th>
@@ -42,7 +41,6 @@
                 <tbody>
                     @foreach (var vendor in Model) {
                         <tr>
-                            <td>@vendor.VendorId</td>
                             <td>@vendor.Name</td>
                             <td>@vendor.ContactInfo</td>
                             <td>@vendor.TotalCredit.ToString("C")</td>
@@ -52,6 +50,13 @@
                                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                 </form>
                             </td>
+                            <td>
+                                <a href="@Url.Action("VendorHistory", "Vendor", new { vendorId = vendor.VendorId })"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-clock-history"></i> View History
+                                </a>
+                            </td>
+
                         </tr>
                     }
                 </tbody>
