@@ -13,6 +13,7 @@ builder.Services.AddDbContext<PhoneCaseDbContext>(options =>
 
 builder.Services.AddScoped<IManagementRepository, SqlManagementRepository>();
 builder.Services.AddScoped<IProductRepository, SqlProductRepositoy>();
+builder.Services.AddScoped<IVendorRepository, SqlVendorRepository>();
 
 
 var app = builder.Build();

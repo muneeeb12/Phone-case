@@ -2,21 +2,24 @@
 using Microsoft.EntityFrameworkCore;
 using Phonecase.Data;
 using Phonecase.Models;
+using Phonecase.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Phonecase.Controllers {
     public class VendorController : Controller {
         private readonly PhoneCaseDbContext _context;
+        private readonly IVendorRepository _vendorRepository;
 
         // Inject the DbContext via constructor
-        public VendorController(PhoneCaseDbContext context) {
+        public VendorController(PhoneCaseDbContext context, IVendorRepository vendorRepository) {
             _context = context;
+            _vendorRepository = vendorRepository;
         }
 
         // Action to display the vendor management page
         public async Task<IActionResult> Index() {
-            var vendors = await _context.Vendors.ToListAsync();
+            var vendors = await _vendorRepository.GetVendorAsync();
             return View(vendors);
         }
 
@@ -30,8 +33,8 @@ namespace Phonecase.Controllers {
                     TotalCredit = 0.00m
                 };
 
-                await _context.Vendors.AddAsync(vendor);
-                await _context.SaveChangesAsync();
+                await _vendorRepository.CreateVendorAsync(vendor);
+                
             }
             return RedirectToAction("Index");
         }
@@ -39,37 +42,28 @@ namespace Phonecase.Controllers {
         // Action to delete a vendor
         [HttpPost]
         public async Task<IActionResult> DeleteVendor(int vendorId) {
-            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
-            if (vendor != null) {
-                _context.Vendors.Remove(vendor);
-                await _context.SaveChangesAsync();
+            var result = await _vendorRepository.DeleteVendorAsync(vendorId);
+            
+            if (result != null)
+            {
+                return Ok("success!");
+
             }
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> VendorHistory(int vendorId) {
-            var vendor = await _context.Vendors
-                .FirstOrDefaultAsync(v => v.VendorId == vendorId);
-
-            if (vendor == null) {
+            
+            var result = await _vendorRepository.GetVendorByIdAsync(vendorId);
+            if (result == null) {
                 return NotFound("Vendor not found.");
             }
 
-            var purchaseHistory = await _context.Purchases
-                .Where(p => p.VendorId == vendorId)
-                .Include(p => p.Product)
-                .ThenInclude(m => m.Model)
-                .Include(p => p.Product)
-                .ThenInclude(cm => cm.CaseManufacturer)
-                .OrderByDescending(p => p.PurchaseDate)
-                .ToListAsync();
+            var purchaseHistory = await _vendorRepository.GetPurchaseHistoryByIdAsync(vendorId);
 
-            var paymentHistory = await _context.Payments
-                .Where(p => p.VendorId == vendorId)
-                .OrderByDescending(p => p.PaymentDate)
-                .ToListAsync();
+            var paymentHistory = await _vendorRepository.GetPaymentHistoryByIdAsync(vendorId);
 
-            ViewBag.Vendor = vendor;
+            ViewBag.Vendor = result;
             ViewBag.PurchaseHistory = purchaseHistory;
             ViewBag.PaymentHistory = paymentHistory;
 

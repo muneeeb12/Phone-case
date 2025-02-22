@@ -5,10 +5,10 @@
     var paymentHistory = ViewBag.PaymentHistory as List<Phonecase.Models.Payment>;
 }
 
-<div class="container mt-3">
+@if (vendor != null)
+{
     <h1>Vendor History: @vendor.Name</h1>
 
-    <!-- Vendor Details -->
     <div class="card mb-4">
         <div class="card-header">Vendor Information</div>
         <div class="card-body">
@@ -19,8 +19,14 @@
             <a href="@Url.Action("PayVendor", "Vendor", new { vendorId = vendor.VendorId })" class="btn btn-success">
                 <i class="bi bi-cash"></i> Make Payment
             </a>
-        </div
+        </div>
     </div>
+}
+else
+{
+    <p class="text-danger">Vendor not found.</p>
+}
+
 
     <!-- Purchase History -->
     <div class="card mb-4">
