@@ -20,15 +20,17 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        <!-- Home Link -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <!-- Dropdown for Management and Product -->
+
+                        <!-- Inventory Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownInventory" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Inventory
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownInventory">
                                 <li>
                                     <a class="dropdown-item" asp-controller="Management" asp-action="Index">Management</a>
                                 </li>
@@ -37,16 +39,33 @@
                                 </li>
                             </ul>
                         </li>
+
+                        <!-- Vendor Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownVendor" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Vendor
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownVendor">
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Vendor" asp-action="Index">Add/Remove</a>
+                                    <a class="dropdown-item" asp-controller="Vendor" asp-action="Index">Add/Remove Vendor</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" asp-controller="" asp-action="">View History</a>
+                                    <a class="dropdown-item" asp-controller="History" asp-action="PurchaseHistory">Vendor Purchase History</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Record Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdownRecord" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Records
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownRecord">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Record" asp-action="Index">Add New Record</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="History" asp-action="PurchaseHistory">View Purchase History</a>
                                 </li>
                             </ul>
                         </li>
@@ -61,6 +80,7 @@
         </main>
     </div>
 
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
