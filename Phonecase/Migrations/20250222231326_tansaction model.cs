@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Phonecase.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class tansactionmodel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

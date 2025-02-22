@@ -9,6 +9,7 @@ namespace Phonecase.Data
 
         public DbSet<Vendor> Vendors { get; set; }
         public DbSet<CaseManufacturer> CaseManufacturers { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
         public DbSet<PhoneModel> PhoneModels { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Purchase> Purchases { get; set; }

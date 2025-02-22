@@ -12,8 +12,8 @@ using Phonecase.Data;
 namespace Phonecase.Migrations
 {
     [DbContext(typeof(PhoneCaseDbContext))]
-    [Migration("20250221164308_initial")]
-    partial class initial
+    [Migration("20250222231326_tansaction model")]
+    partial class tansactionmodel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
