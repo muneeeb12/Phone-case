@@ -60,24 +60,24 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Product</th>
-                                <th>Model</th>
-                                <th>Manufacturer</th>
-                                <th>Quantity</th>
-                                <th>Unit Price</th>
+                                <th>Model / Manufacturer</th>
                                 <th>Total Price</th>
                                 <th>Purchase Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var purchase in purchaseHistory) {
                                 <tr>
-                                    <td>@purchase.Product?.CaseName</td>
-                                    <td>@purchase.Product?.Model?.Name</td>
-                                    <td>@purchase.Product?.CaseManufacturer?.Name</td>
-                                    <td>@purchase.Quantity</td>
-                                    <td>Rs.@purchase.UnitPrice</td>
+                                    <td>@purchase.Product?.CaseName (@purchase.Quantity) </td>
+                                    <td>@purchase.Product?.Model?.Name / @purchase.Product?.CaseManufacturer?.Name</td>
                                     <td>Rs.@(purchase.Quantity * purchase.UnitPrice)</td>
                                     <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <a href="@Url.Action("EditPurchase", "History", new { id = purchase.PurchaseId })" class="btn btn-outline-primary btn-sm">
+                                            Edit
+                                        </a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
