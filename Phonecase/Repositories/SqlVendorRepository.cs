@@ -2,65 +2,41 @@
 using Phonecase.Data;
 using Phonecase.Models;
 
-namespace Phonecase.Repositories
-{
-    public class SqlVendorRepository: IVendorRepository
-    {
+namespace Phonecase.Repositories {
+    public class SqlVendorRepository : IVendorRepository {
         private readonly PhoneCaseDbContext _context;
-        public SqlVendorRepository(PhoneCaseDbContext dbContext)
-        {
+
+        public SqlVendorRepository(PhoneCaseDbContext dbContext) {
             _context = dbContext;
         }
 
-        public async Task<Vendor> CreateVendorAsync(Vendor vendor)
-        {
+        public async Task<Vendor> CreateVendorAsync(Vendor vendor) {
             await _context.Vendors.AddAsync(vendor);
             await _context.SaveChangesAsync();
             return vendor;
         }
 
-        public async Task<Vendor?> DeleteVendorAsync(int id)
-        {
+        public async Task<Vendor?> DeleteVendorAsync(int id) {
             var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == id);
-            if (vendor == null)
-            {
+            if (vendor == null) {
                 return null;
             }
+
             _context.Vendors.Remove(vendor);
             await _context.SaveChangesAsync();
             return vendor;
-
         }
 
-        public async Task<IEnumerable<Payment?>> GetPaymentHistoryByIdAsync(int id)
-        {
-            var vendor = await _context.Payments
-                        .FirstOrDefaultAsync(v => v.VendorId == id);
-            if (vendor == null)
-            {
-                return new List<Payment>();
-            }
-
+        public async Task<IEnumerable<Payment>> GetPaymentHistoryByIdAsync(int id) {
             var paymentHistory = await _context.Payments
                 .Where(p => p.VendorId == id)
                 .OrderByDescending(p => p.PaymentDate)
                 .ToListAsync();
 
             return paymentHistory;
-
-           
         }
 
-        public async Task<IEnumerable<Purchase>> GetPurchaseHistoryByIdAsync(int id)
-        {
-            var vendor = await _context.Purchases
-                .FirstOrDefaultAsync(v => v.VendorId == id);
-
-            if (vendor == null)
-            {
-                return new List<Purchase>(); // Return an empty list instead of null
-            }
-
+        public async Task<IEnumerable<Purchase>> GetPurchaseHistoryByIdAsync(int id) {
             var purchaseHistory = await _context.Purchases
                 .Where(p => p.VendorId == id)
                 .Include(p => p.Product)
@@ -73,21 +49,25 @@ namespace Phonecase.Repositories
             return purchaseHistory;
         }
 
-        public async Task<IEnumerable<Vendor>> GetVendorAsync()
-        {
-            var vendors = await _context.Vendors.ToListAsync();
-            return vendors;
+        public async Task<IEnumerable<Vendor>> GetVendorAsync() {
+            return await _context.Vendors.ToListAsync();
         }
 
-        public async Task<Vendor?> GetVendorByIdAsync(int id)
-        {
-            var vendor = await _context.Vendors
-                        .FirstOrDefaultAsync(v => v.VendorId == id);
-            if (vendor == null)
-            {
+        public async Task<Vendor?> GetVendorByIdAsync(int id) {
+            return await _context.Vendors
+                .FirstOrDefaultAsync(v => v.VendorId == id);
+        }
+
+        public async Task<Vendor?> UpdateVendorAsync(Vendor vendor) {
+            var vendorFind = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendor.VendorId);
+            if (vendorFind == null) {
                 return null;
             }
-            return vendor;
+
+            vendorFind.Name = vendor.Name;
+            vendorFind.TotalCredit = vendor.TotalCredit; // Fixed typo in property name
+            await _context.SaveChangesAsync();
+            return vendorFind;
         }
     }
 }
