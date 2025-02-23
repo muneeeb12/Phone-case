@@ -79,7 +79,7 @@ namespace Phonecase.Controllers {
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> PayVendor(int vendorId, decimal amount) {
+        public async Task<IActionResult> PayVendor(int vendorId, decimal amount, DateTime paymentDate) {
             if (amount <= 0) {
                 TempData["Error"] = "Invalid payment amount.";
                 return RedirectToAction("VendorHistory", new { vendorId });
@@ -95,10 +95,25 @@ namespace Phonecase.Controllers {
                 return RedirectToAction("VendorHistory", new { vendorId });
             }
 
+            // Fetch the oldest purchase date for the vendor
+            var oldestPurchaseDate = await _vendorRepository.GetOldestPurchaseDateAsync(vendorId);
+
+            // Ensure the payment date is within the allowed range (last 7 days)
+            if (paymentDate > DateTime.Now || paymentDate < DateTime.Now.AddDays(-7)) {
+                TempData["Error"] = "Payment date must be within the last 7 days.";
+                return RedirectToAction("VendorHistory", new { vendorId });
+            }
+
+            // Ensure the payment date is not before the oldest purchase date
+            if (oldestPurchaseDate != null && paymentDate < oldestPurchaseDate) {
+                TempData["Error"] = $"Payment date cannot be before the first credit date: {oldestPurchaseDate.Value.ToShortDateString()}.";
+                return RedirectToAction("VendorHistory", new { vendorId });
+            }
+
             var payment = new Payment {
                 VendorId = vendorId,
                 Amount = amount,
-                PaymentDate = DateTime.Now
+                PaymentDate = paymentDate // Use the selected payment date
             };
 
             // Deduct payment amount from vendor's credit
@@ -110,6 +125,5 @@ namespace Phonecase.Controllers {
             TempData["Success"] = "Payment recorded successfully.";
             return RedirectToAction("VendorHistory", new { vendorId });
         }
-
     }
 }

@@ -75,5 +75,12 @@ namespace Phonecase.Repositories {
             await _context.SaveChangesAsync();
             return vendorFind;
         }
+        public async Task<DateTime?> GetOldestPurchaseDateAsync(int vendorId) {
+            return await _context.Purchases
+                .Where(p => p.VendorId == vendorId)
+                .OrderBy(p => p.PurchaseDate)
+                .Select(p => p.PurchaseDate)
+                .FirstOrDefaultAsync();
+        }
     }
 }

@@ -33,6 +33,15 @@
                     <input type="number" class="form-control" name="amount" min="0.01" step="0.01" required>
                 </div>
 
+                <!-- Add Payment Date Input -->
+                <div class="mb-3">
+                    <label class="form-label">Payment Date</label>
+                    <input type="date" class="form-control" name="paymentDate"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           min="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")"
+                           max="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Pay Vendor</button>
                 <a href="@Url.Action("VendorHistory", "Vendor", new { vendorId = ViewBag.Vendor.VendorId })" class="btn btn-secondary">Back to Vendor History</a>
             </form>
