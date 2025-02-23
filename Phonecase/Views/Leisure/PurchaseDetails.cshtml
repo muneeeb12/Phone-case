@@ -1,0 +1,49 @@
+﻿@model List<Phonecase.Models.Purchase>
+
+@{
+    ViewData["Title"] = "Purchase Details";
+    var vendorId = Model.FirstOrDefault()?.VendorId ?? 0;
+}
+
+<h1>Purchase Details</h1>
+
+<div class="card mb-4">
+    <div class="card-header">Purchase Information</div>
+    <div class="card-body">
+        @if (Model != null && Model.Any()) {
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Product</th>
+                        <th>Model</th>
+                        <th>Manufacturer</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Price</th>
+                        <th>Purchase Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var purchase in Model) {
+                        <tr>
+                            <td>@purchase.Product?.CaseName</td>
+                            <td>@purchase.Product?.Model?.Name</td>
+                            <td>@purchase.Product?.CaseManufacturer?.Name</td>
+                            <td>@purchase.Quantity</td>
+                            <td>@purchase.UnitPrice.ToString("C")</td>
+                            <td>@(purchase.Quantity * purchase.UnitPrice).ToString("C")</td>
+                            <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        } else {
+            <p class="text-muted">No purchase details available.</p>
+        }
+    </div>
+</div>
+
+<!-- Back to Vendor Transactions -->
+<a href="@Url.Action("VendorLeisure", "Leisure", new { vendorId = vendorId, filter = "all" })" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Back to Vendor Transactions
+</a>

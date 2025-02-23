@@ -8,12 +8,10 @@ using System.Threading.Tasks;
 
 namespace Phonecase.Controllers {
     public class VendorController : Controller {
-        private readonly PhoneCaseDbContext _context;
         private readonly IVendorRepository _vendorRepository;
 
         // Inject the DbContext via constructor
         public VendorController(PhoneCaseDbContext context, IVendorRepository vendorRepository) {
-            _context = context;
             _vendorRepository = vendorRepository;
         }
 
@@ -71,7 +69,7 @@ namespace Phonecase.Controllers {
         }
 
         public async Task<IActionResult> PayVendor(int vendorId) {
-            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
+            var vendor = await _vendorRepository.GetVendorByIdAsync(vendorId);
 
             if (vendor == null) {
                 return NotFound("Vendor not found.");
@@ -87,7 +85,7 @@ namespace Phonecase.Controllers {
                 return RedirectToAction("VendorHistory", new { vendorId });
             }
 
-            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
+            var vendor = await _vendorRepository.GetVendorByIdAsync(vendorId);
             if (vendor == null) {
                 return NotFound("Vendor not found.");
             }
@@ -106,9 +104,8 @@ namespace Phonecase.Controllers {
             // Deduct payment amount from vendor's credit
             vendor.TotalCredit -= amount;
 
-            _context.Payments.Add(payment);
-            _context.Vendors.Update(vendor);
-            await _context.SaveChangesAsync();
+            await _vendorRepository.CreatePaymentAsync(payment);
+            await _vendorRepository.UpdateVendorAsync(vendor);
 
             TempData["Success"] = "Payment recorded successfully.";
             return RedirectToAction("VendorHistory", new { vendorId });

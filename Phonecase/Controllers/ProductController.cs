@@ -7,16 +7,13 @@ using System.Threading.Tasks;
 
 namespace Phonecase.Controllers {
     public class ProductController : Controller {
-        private readonly PhoneCaseDbContext _dbContext;
         private readonly IProductRepository _productrepository;
         private readonly IManagementRepository _managementrepository;
 
         public ProductController(
-            PhoneCaseDbContext dbContext,
             IProductRepository productrepository,
             IManagementRepository managementRepository) {
 
-            _dbContext = dbContext;
             _productrepository = productrepository;
             _managementrepository = managementRepository;
         }

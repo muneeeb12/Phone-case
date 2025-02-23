@@ -1,0 +1,33 @@
+﻿@model List<Phonecase.Controllers.LeisureTransactionViewModel>
+
+<h2>Vendor Transactions</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Remaining Balance</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var transaction in Model) {
+            <tr>
+                <td>@transaction.Date.ToShortDateString()</td>
+                <td>
+                    @if (transaction.TransactionType == "purchase") {
+                        <a href="@Url.Action("PurchaseDetails", "Leisure", new { purchaseIds = string.Join(",", transaction.PurchaseIds) })">
+                            @transaction.Description
+                        </a>
+                    } else {
+                        @transaction.Description
+                    }
+                </td>
+                <td>@(transaction.Debit > 0 ? transaction.Debit.ToString("C") : "-")</td>
+                <td>@(transaction.Credit > 0 ? transaction.Credit.ToString("C") : "-")</td>
+                <td>@transaction.RemainingBalance.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
