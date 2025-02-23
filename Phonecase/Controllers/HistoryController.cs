@@ -71,9 +71,60 @@ namespace Phonecase.Controllers {
             ViewBag.PaymentHistory = null; // No history on first load
             return View();
         }
+        
+        public async Task<IActionResult> EditPurchase(int id) {
+            var purchase = await _context.Purchases
+                .Include(p => p.Product)
+                .ThenInclude(m => m.Model)
+                .Include(p => p.Product)
+                .ThenInclude(cm => cm.CaseManufacturer)
+                .FirstOrDefaultAsync(p => p.PurchaseId == id);
 
-        // 🟢 POST: Fetch Payment History Based on Vendor & Date Filter
+            if (purchase == null) {
+                return NotFound("Purchase not found.");
+            }
+
+            return View(purchase);
+        }
         [HttpPost]
+        public async Task<IActionResult> EditPurchase(int id, int quantity, decimal unitPrice) {
+            var purchase = await _context.Purchases
+                .Include(p => p.Vendor)
+                .FirstOrDefaultAsync(p => p.PurchaseId == id);
+
+            if (purchase == null) {
+                return NotFound("Purchase not found.");
+            }
+
+            decimal oldTotal = purchase.Quantity * purchase.UnitPrice;
+            decimal newTotal = quantity * unitPrice;
+            decimal difference = newTotal - oldTotal;
+
+            // Adjust vendor credit
+            if (difference > 0) {
+                // Increase credit
+                purchase.Vendor.TotalCredit += difference;
+            } else if (difference < 0) {
+                // Decrease credit only if credit is greater than zero
+                if (purchase.Vendor.TotalCredit > 0) {
+                    decimal deductionAmount = Math.Min(purchase.Vendor.TotalCredit, Math.Abs(difference));
+                    purchase.Vendor.TotalCredit -= deductionAmount;
+                }
+            }
+
+            // Update purchase details
+            purchase.Quantity = quantity;
+            purchase.UnitPrice = unitPrice;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("PurchaseHistory", new { vendorId = purchase.VendorId, filter = "all" });
+        }
+
+
+
+
+// 🟢 POST: Fetch Payment History Based on Vendor & Date Filter
+[HttpPost]
         public async Task<IActionResult> PaymentHistory(int vendorId, string filter) {
             var vendor = await GetVendorAsync(vendorId);
             if (vendor == null) return NotFound("Vendor not found.");
