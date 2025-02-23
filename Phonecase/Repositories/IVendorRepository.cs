@@ -10,5 +10,6 @@ namespace Phonecase.Repositories {
         Task<IEnumerable<Purchase>> GetPurchaseHistoryByIdAsync(int id); 
         Task<IEnumerable<Payment>> GetPaymentHistoryByIdAsync(int id);
         Task<Payment> CreatePaymentAsync(Payment payment);
+        Task<DateTime?> GetOldestPurchaseDateAsync(int vendorId);
     }
 }
