@@ -12,15 +12,25 @@
         </div>
         <div class="card-body p-4">
             <form method="post" asp-action="SavePurchase" id="purchaseForm">
-                <!-- Vendor Dropdown -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Select Vendor</label>
-                    <select class="form-control form-control-lg shadow-sm" name="vendorId" id="vendorId" required>
-                        <option value="">Select Vendor</option>
-                        @foreach (var vendor in ViewBag.Vendors) {
-                            <option value="@vendor.VendorId">@vendor.Name</option>
-                        }
-                    </select>
+                <!-- Vendor Dropdown and Date Picker -->
+                <div class="mb-4 d-flex">
+                    <!-- Vendor Selection -->
+                    <div class="me-3">
+                        <label class="form-label fw-bold">Select Vendor</label>
+                        <select class="form-control form-control-lg shadow-sm" name="vendorId" id="vendorId" required>
+                            <option value="">Select Vendor</option>
+                            @foreach (var vendor in ViewBag.Vendors)
+                            {
+                                <option value="@vendor.VendorId">@vendor.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Date Picker -->
+                    <div>
+                        <label class="form-label fw-bold">Select Date</label>
+                        <input type="date" class="form-control form-control-lg shadow-sm" name="purchaseDate" id="purchaseDate" required>
+                    </div>
                 </div>
 
                 <!-- Add Items Section -->
@@ -135,6 +145,20 @@
 @section scripts {
     <script>
         $(document).ready(function () {
+
+            // Get today's date and the date 7 days ago
+            var today = new Date();
+            var sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(today.getDate() - 7);
+
+            // Format dates as YYYY-MM-DD
+            var todayFormatted = today.toISOString().split('T')[0];
+            var sevenDaysAgoFormatted = sevenDaysAgo.toISOString().split('T')[0];
+
+            // Set min and max attributes for the date input
+            $('#purchaseDate').attr('min', sevenDaysAgoFormatted);
+            $('#purchaseDate').attr('max', todayFormatted);
+
             // Add new item
             $("#addItem").on("click", function () {
                 var newItem = $(".item").first().clone();

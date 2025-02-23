@@ -28,31 +28,42 @@ namespace Phonecase.Controllers {
             return View();
         }
 
-        public async Task<IActionResult> SavePurchase(int vendorId, int[] productIds, int[] quantities, decimal[] unitPrices) {
-            if (vendorId <= 0 || productIds == null || quantities == null || unitPrices == null) {
-                // Handle null data safely
+        public async Task<IActionResult> SavePurchase(int vendorId, int[] productIds, int[] quantities, decimal[] unitPrices, DateTime purchaseDate)
+        {
+            if (vendorId <= 0 || productIds == null || quantities == null || unitPrices == null)
+            {
                 return BadRequest("Invalid purchase data. Please check input values.");
             }
 
-            if (productIds.Length != quantities.Length || productIds.Length != unitPrices.Length) {
-                // Ensure array lengths match
+            if (productIds.Length != quantities.Length || productIds.Length != unitPrices.Length)
+            {
                 return BadRequest("Mismatched product, quantity, and price data.");
             }
 
             var vendor = await _context.Vendors.FindAsync(vendorId);
-            if (vendor == null) {
+            if (vendor == null)
+            {
                 return NotFound("Vendor not found.");
+            }
+
+            // Ensure purchase date is within the last 7 days
+            DateTime today = DateTime.Today;
+            if (purchaseDate > today || purchaseDate < today.AddDays(-7))
+            {
+                return BadRequest("Invalid purchase date. The date must be today or within the last 7 days.");
             }
 
             decimal totalPurchaseAmount = 0;
 
-            for (int i = 0; i < productIds.Length; i++) {
-                var purchase = new Purchase {
+            for (int i = 0; i < productIds.Length; i++)
+            {
+                var purchase = new Purchase
+                {
                     VendorId = vendorId,
                     ProductId = productIds[i],
                     Quantity = quantities[i],
                     UnitPrice = unitPrices[i],
-                    PurchaseDate = DateTime.Now
+                    PurchaseDate = purchaseDate
                 };
 
                 totalPurchaseAmount += purchase.Quantity * purchase.UnitPrice;
