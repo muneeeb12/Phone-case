@@ -38,7 +38,7 @@
                     <label class="form-label">Payment Date</label>
                     <input type="date" class="form-control" name="paymentDate"
                            value="@DateTime.Now.ToString("yyyy-MM-dd")"
-                           min="@ViewBag.OldestPurchaseDate?.ToString("yyyy-MM-dd")"
+                           min="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")"
                            max="@DateTime.Now.ToString("yyyy-MM-dd")" required>
                 </div>
 

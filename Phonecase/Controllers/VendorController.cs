@@ -75,12 +75,7 @@ namespace Phonecase.Controllers {
                 return NotFound("Vendor not found.");
             }
 
-            // Fetch the oldest purchase date for the vendor
-            var oldestPurchaseDate = await _vendorRepository.GetOldestPurchaseDateAsync(vendorId);
-
             ViewBag.Vendor = vendor;
-            ViewBag.OldestPurchaseDate = oldestPurchaseDate;
-
             return View();
         }
         [HttpPost]
@@ -110,7 +105,7 @@ namespace Phonecase.Controllers {
             }
 
             // Ensure the payment date is not before the oldest purchase date
-            if (oldestPurchaseDate != null && paymentDate.Date < oldestPurchaseDate.Value.Date) {
+            if (oldestPurchaseDate != null && paymentDate < oldestPurchaseDate) {
                 TempData["Error"] = $"Payment date cannot be before the first credit date: {oldestPurchaseDate.Value.ToShortDateString()}.";
                 return RedirectToAction("VendorHistory", new { vendorId });
             }
