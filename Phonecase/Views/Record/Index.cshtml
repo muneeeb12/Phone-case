@@ -132,80 +132,80 @@
     </div>
 </div>
 
-
-<!-- Custom Script for Dynamic Form Handling -->
-<script>
-    $(document).ready(function () {
-        // Add new item
-        $("#addItem").on("click", function () {
-            var newItem = $(".item").first().clone();
-            newItem.find("input").val("");
-            newItem.find("select").val("");
-            newItem.find(".total-price").val("0.00");
-            $("#itemsSection").append(newItem);
-            updateSummary();
-        });
-
-        // Remove item
-        $(document).on("click", ".remove-item", function () {
-            if ($(".item").length > 1) {
-                $(this).closest(".item").remove();
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Add new item
+            $("#addItem").on("click", function () {
+                var newItem = $(".item").first().clone();
+                newItem.find("input").val("");
+                newItem.find("select").val("");
+                newItem.find(".total-price").val("0.00");
+                $("#itemsSection").append(newItem);
                 updateSummary();
-            }
-        });
-
-        // Open modal to add new product
-        $(document).on("click", ".add-product", function () {
-            $("#addProductModal").modal("show");
-        });
-
-        // Save new product
-        $("#saveProduct").on("click", function () {
-            var caseName = $("#caseName").val();
-            var modelId = $("#modelId").val();
-            var caseManufacturerId = $("#caseManufacturerId").val();
-
-            if (caseName && modelId && caseManufacturerId) {
-                $.ajax({
-                    url: "/Record/AddProduct",
-                    type: "POST",
-                    data: {
-                        caseName: caseName,
-                        modelId: modelId,
-                        caseManufacturerId: caseManufacturerId
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            // Add the new product to the dropdown
-                            var newOption = `<option value="${response.productId}">${response.caseName}</option>`;
-                            $(".product-select").append(newOption);
-                            $("#addProductModal").modal("hide");
-                        }
-                    }
-                });
-            }
-        });
-
-        // Calculate total price
-        $(document).on("input", ".quantity, .unit-price", function () {
-            var item = $(this).closest(".item");
-            var quantity = parseFloat(item.find(".quantity").val()) || 0;
-            var unitPrice = parseFloat(item.find(".unit-price").val()) || 0;
-            var totalPrice = quantity * unitPrice;
-            item.find(".total-price").val(totalPrice.toFixed(2));
-            updateSummary();
-        });
-
-        // Update purchase summary
-        function updateSummary() {
-            var itemCount = $(".item").length;
-            var subtotal = 0;
-            $(".item").each(function () {
-                var totalPrice = parseFloat($(this).find(".total-price").val()) || 0;
-                subtotal += totalPrice;
             });
-            $("#itemCount").text(itemCount);
-            $("#subtotal").text(subtotal.toFixed(2));
-        }
-    });
-</script>
+
+            // Remove item
+            $(document).on("click", ".remove-item", function () {
+                if ($(".item").length > 1) {
+                    $(this).closest(".item").remove();
+                    updateSummary();
+                }
+            });
+
+            // Open modal to add new product
+            $(document).on("click", ".add-product", function () {
+                $("#addProductModal").modal("show");
+            });
+
+            // Save new product
+            $("#saveProduct").on("click", function () {
+                var caseName = $("#caseName").val();
+                var modelId = $("#modelId").val();
+                var caseManufacturerId = $("#caseManufacturerId").val();
+
+                if (caseName && modelId && caseManufacturerId) {
+                    $.ajax({
+                        url: "/Record/AddProduct",
+                        type: "POST",
+                        data: {
+                            caseName: caseName,
+                            modelId: modelId,
+                            caseManufacturerId: caseManufacturerId
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                // Add the new product to the dropdown
+                                var newOption = `<option value="${response.productId}">${response.caseName}</option>`;
+                                $(".product-select").append(newOption);
+                                $("#addProductModal").modal("hide");
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Calculate total price
+            $(document).on("input", ".quantity, .unit-price", function () {
+                var item = $(this).closest(".item");
+                var quantity = parseFloat(item.find(".quantity").val()) || 0;
+                var unitPrice = parseFloat(item.find(".unit-price").val()) || 0;
+                var totalPrice = quantity * unitPrice;
+                item.find(".total-price").val(totalPrice.toFixed(2));
+                updateSummary();
+            });
+
+            // Update purchase summary
+            function updateSummary() {
+                var itemCount = $(".item").length;
+                var subtotal = 0;
+                $(".item").each(function () {
+                    var totalPrice = parseFloat($(this).find(".total-price").val()) || 0;
+                    subtotal += totalPrice;
+                });
+                $("#itemCount").text(itemCount);
+                $("#subtotal").text(subtotal.toFixed(2));
+            }
+        });
+    </script>
+}
