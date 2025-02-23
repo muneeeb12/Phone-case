@@ -1,0 +1,89 @@
+﻿@model List<Phonecase.Models.Payment>
+
+@{
+    ViewData["Title"] = "Payment History";
+    var vendorId = ViewBag.SelectedVendor ?? 0;
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4 text-primary">Payment History</h1>
+
+    <!-- Filter Form -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-light py-3">
+            <h4 class="mb-0">Filter Payment History</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" asp-action="PaymentHistory">
+                <div class="row g-3">
+                    <!-- Vendor Dropdown -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Select Vendor</label>
+                        <select class="form-control form-control-lg shadow-sm" name="vendorId" required>
+                            <option value="">Select Vendor</option>
+                            @foreach (var vendor in ViewBag.Vendors) {
+                                <option value="@vendor.VendorId" selected="@(ViewBag.SelectedVendor == vendor.VendorId ? "selected" : null)">
+                                    @vendor.Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Time Filter -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Filter by</label>
+                        <select class="form-control form-control-lg shadow-sm" name="filter">
+                            <option value="all" selected="@(ViewBag.SelectedFilter == "all" ? "selected" : null)">All Time</option>
+                            <option value="week" selected="@(ViewBag.SelectedFilter == "week" ? "selected" : null)">Last Week</option>
+                            <option value="month" selected="@(ViewBag.SelectedFilter == "month" ? "selected" : null)">Last Month</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment History Table -->
+    @if (Model != null && Model.Any()) {
+        <div class="card shadow mb-4">
+            <div class="card-header bg-light py-3">
+                <h4 class="mb-0">Payment Records</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Payment Date</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var payment in Model) {
+                                <tr>
+                                    <td>@payment.PaymentDate.ToString("yyyy-MM-dd")</td>
+                                    <td>Rs.@payment.Amount</td>
+                                    <td>
+                                        <a href="@Url.Action("EditPayment", "History", new { id = payment.PaymentId })" class="btn btn-outline-primary btn-sm">
+                                            Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    } else {
+        <p class="text-muted">No payments found for this vendor in the selected time frame.</p>
+    }
+</div>
