@@ -9,5 +9,6 @@ namespace Phonecase.Repositories {
         Task<Vendor?> UpdateVendorAsync(Vendor vendor); 
         Task<IEnumerable<Purchase>> GetPurchaseHistoryByIdAsync(int id); 
         Task<IEnumerable<Payment>> GetPaymentHistoryByIdAsync(int id);
+        Task<Payment> CreatePaymentAsync(Payment payment);
     }
 }

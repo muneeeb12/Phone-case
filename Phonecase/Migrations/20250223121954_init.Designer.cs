@@ -12,8 +12,8 @@ using Phonecase.Data;
 namespace Phonecase.Migrations
 {
     [DbContext(typeof(PhoneCaseDbContext))]
-    [Migration("20250222231326_tansaction model")]
-    partial class tansactionmodel
+    [Migration("20250223121954_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -157,6 +157,9 @@ namespace Phonecase.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RemainingBalance")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal>("TotalCredit")
                         .HasColumnType("decimal(10,2)");

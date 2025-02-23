@@ -12,7 +12,7 @@ builder.Services.AddDbContext<PhoneCaseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IManagementRepository, SqlManagementRepository>();
-builder.Services.AddScoped<IProductRepository, SqlProductRepositoy>();
+builder.Services.AddScoped<IProductRepository, SqlProductRepository>();
 builder.Services.AddScoped<IVendorRepository, SqlVendorRepository>();
 
 
@@ -35,7 +35,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Leisure}/{action=Dashboard}/{id?}")
+    pattern: "{controller=Leisure}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 

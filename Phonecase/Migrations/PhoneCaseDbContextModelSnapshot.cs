@@ -155,6 +155,9 @@ namespace Phonecase.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("RemainingBalance")
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<decimal>("TotalCredit")
                         .HasColumnType("decimal(10,2)");
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Phonecase.Migrations
 {
     /// <inheritdoc />
-    public partial class tansactionmodel : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,7 +45,8 @@ namespace Phonecase.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ContactInfo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TotalCredit = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
+                    TotalCredit = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    RemainingBalance = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
                 },
                 constraints: table =>
                 {

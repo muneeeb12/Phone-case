@@ -1,92 +1,144 @@
-﻿using System;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Phonecase.Data;
 using Phonecase.Models;
-using Phonecase.Data; // Assuming your DbContext is inside a `Data` folder
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Phonecase.Controllers
-{
-    public class LeisureController : Controller
-    {
+namespace Phonecase.Controllers {
+    public class LeisureController : Controller {
         private readonly PhoneCaseDbContext _context;
 
-        public LeisureController(PhoneCaseDbContext context)
-        {
+        public LeisureController(PhoneCaseDbContext context) {
             _context = context;
         }
 
-        // Dashboard View
-        public IActionResult Dashboard()
-        {
-            var transactions = _context.Transactions.OrderByDescending(t => t.Date).ToList();
-            return View(transactions);
+        // GET: Show Vendors for search
+        public async Task<IActionResult> Index() {
+            ViewBag.Vendors = await _context.Vendors.ToListAsync();
+            return View();
         }
 
-        // View transactions for a specific vendor
-        public IActionResult VendorTransactions(int vendorId)
-        {
-            var transactions = _context.Transactions
-                .Where(t => t.VendorId == vendorId)
-                .OrderByDescending(t => t.Date)
+        // POST: Fetch vendor transactions based on filter (week/month)
+        [HttpPost]
+        public async Task<IActionResult> VendorLeisure(int vendorId, string filter) {
+            var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
+            if (vendor == null) {
+                return NotFound("Vendor not found.");
+            }
+
+            DateTime startDate = DateTime.MinValue;
+            if (filter == "week") {
+                startDate = DateTime.Now.AddDays(-7);
+            } else if (filter == "month") {
+                startDate = DateTime.Now.AddMonths(-1);
+            }
+
+            // Fetch purchases and group by date
+            var purchases = await _context.Purchases
+                .Where(p => p.VendorId == vendorId && p.PurchaseDate >= startDate)
+                .GroupBy(p => p.PurchaseDate.Date)
+                .Select(g => new {
+                    Date = g.Key,
+                    TotalDebit = g.Sum(p => p.Quantity * p.UnitPrice),
+                    PurchaseIds = g.Select(p => p.PurchaseId).ToList()
+                })
+                .ToListAsync();
+
+            // Fetch payments and group by date
+            var payments = await _context.Payments
+                .Where(p => p.VendorId == vendorId && p.PaymentDate >= startDate)
+                .GroupBy(p => p.PaymentDate.Date)
+                .Select(g => new {
+                    Date = g.Key,
+                    TotalCredit = g.Sum(p => p.Amount)
+                })
+                .ToListAsync();
+
+            var transactions = new List<LeisureTransactionViewModel>();
+            decimal runningBalance = vendor.RemainingBalance;
+
+            // Combine purchases & payments by date
+            var groupedTransactions = purchases
+                .Select(p => new LeisureTransactionViewModel {
+                    Date = p.Date,
+                    Description = $"Purchases",
+                    Debit = p.TotalDebit,
+                    Credit = 0,
+                    RemainingBalance = runningBalance += p.TotalDebit,
+                    TransactionType = "purchase",
+                    PurchaseIds = p.PurchaseIds
+                })
+                .Union(payments.Select(pay => new LeisureTransactionViewModel {
+                    Date = pay.Date,
+                    Description = "Payment",
+                    Debit = 0,
+                    Credit = pay.TotalCredit,
+                    RemainingBalance = runningBalance -= pay.TotalCredit,
+                    TransactionType = "payment"
+                }))
+                .GroupBy(t => t.Date)  // Merge purchases & payments on the same date
+                .Select(g => new LeisureTransactionViewModel {
+                    Date = g.Key,
+                    Description = string.Join(" | ", g.Select(t => t.Description)), // Combine descriptions
+                    Debit = g.Sum(t => t.Debit),
+                    Credit = g.Sum(t => t.Credit),
+                    RemainingBalance = g.Last().RemainingBalance, // Keep latest balance
+                    TransactionType = g.Any(t => t.TransactionType == "purchase") ? "purchase" : "payment",
+                    PurchaseIds = g.SelectMany(t => t.PurchaseIds ?? new List<int>()).ToList()
+                })
+                .OrderBy(t => t.Date)
                 .ToList();
 
-            return View(transactions);
+            ViewBag.Vendors = await _context.Vendors.ToListAsync();
+            ViewBag.SelectedVendor = vendorId;
+            ViewBag.SelectedFilter = filter;
+
+            return View(groupedTransactions);
         }
 
-        // Add a new transaction
-        [HttpPost]
-        public IActionResult AddTransaction(Transaction transaction)
-        {
-            if (ModelState.IsValid)
-            {
-                // Get the last transaction balance for the vendor
-                var lastTransaction = _context.Transactions
-                    .Where(t => t.VendorId == transaction.VendorId)
-                    .OrderByDescending(t => t.Date)
-                    .FirstOrDefault();
-
-                decimal lastBalance = lastTransaction?.CashBalance ?? 0;
-                transaction.CashBalance = lastBalance + (transaction.Credit ?? 0) - (transaction.Debit ?? 0);
-
-                _context.Transactions.Add(transaction);
-                _context.SaveChanges();
-
-                return RedirectToAction("Dashboard");
+        // GET: Show all products for a specific purchase date
+        public async Task<IActionResult> PurchaseDetails(string purchaseIds) {
+            if (string.IsNullOrEmpty(purchaseIds)) {
+                return NotFound("No purchase IDs provided.");
             }
 
-            return View(transaction);
-        }
+            // Convert comma-separated string into list of integers
+            var purchaseIdList = purchaseIds.Split(',')
+                                            .Select(id => int.TryParse(id, out int parsedId) ? parsedId : (int?)null)
+                                            .Where(id => id.HasValue)
+                                            .Select(id => id.Value)
+                                            .ToList();
 
-        // Edit a transaction
-        public IActionResult EditTransaction(int id)
-        {
-            var transaction = _context.Transactions.Find(id);
-            if (transaction == null) return NotFound();
-            return View(transaction);
-        }
-
-        [HttpPost]
-        public IActionResult EditTransaction(Transaction transaction)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Transactions.Update(transaction);
-                _context.SaveChanges();
-                return RedirectToAction("Dashboard");
+            if (!purchaseIdList.Any()) {
+                return NotFound("Invalid purchase IDs.");
             }
-            return View(transaction);
-        }
 
-        // Delete a transaction
-        public IActionResult DeleteTransaction(int id)
-        {
-            var transaction = _context.Transactions.Find(id);
-            if (transaction != null)
-            {
-                _context.Transactions.Remove(transaction);
-                _context.SaveChanges();
+            var purchases = await _context.Purchases
+                .Where(p => purchaseIdList.Contains(p.PurchaseId))
+                .Include(p => p.Product)
+                .ThenInclude(m => m.Model)
+                .Include(p => p.Product)
+                .ThenInclude(cm => cm.CaseManufacturer)
+                .ToListAsync();
+
+            if (!purchases.Any()) {
+                return NotFound("No purchases found for this date.");
             }
-            return RedirectToAction("Dashboard");
+
+            return View(purchases);
         }
+    }
+
+    public class LeisureTransactionViewModel {
+        public DateTime Date { get; set; }
+        public string Description { get; set; }
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
+        public decimal RemainingBalance { get; set; }
+        public string TransactionType { get; set; }
+        public List<int> PurchaseIds { get; set; } = new List<int>(); // Store purchase IDs for the date
     }
 }

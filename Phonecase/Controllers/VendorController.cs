@@ -12,7 +12,6 @@ namespace Phonecase.Controllers {
 
         // Inject the DbContext via constructor
         public VendorController(PhoneCaseDbContext context, IVendorRepository vendorRepository) {
-            _context = context;
             _vendorRepository = vendorRepository;
         }
 
@@ -105,9 +104,8 @@ namespace Phonecase.Controllers {
             // Deduct payment amount from vendor's credit
             vendor.TotalCredit -= amount;
 
-            _context.Payments.Add(payment);
+            await _vendorRepository.CreatePaymentAsync(payment);
             await _vendorRepository.UpdateVendorAsync(vendor);
-            await _context.SaveChangesAsync();
 
             TempData["Success"] = "Payment recorded successfully.";
             return RedirectToAction("VendorHistory", new { vendorId });

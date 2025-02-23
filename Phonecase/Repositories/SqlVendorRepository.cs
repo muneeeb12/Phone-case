@@ -10,6 +10,12 @@ namespace Phonecase.Repositories {
             _context = dbContext;
         }
 
+        public async Task<Payment> CreatePaymentAsync(Payment payment) {
+            await _context.Payments.AddAsync(payment);
+            await _context.SaveChangesAsync();
+            return payment;
+        }
+
         public async Task<Vendor> CreateVendorAsync(Vendor vendor) {
             await _context.Vendors.AddAsync(vendor);
             await _context.SaveChangesAsync();
