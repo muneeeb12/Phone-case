@@ -29,65 +29,66 @@ namespace Phonecase.Controllers {
                 return NotFound("Vendor not found.");
             }
 
-            DateTime startDate = DateTime.MinValue;
-            if (filter == "week") {
-                startDate = DateTime.Now.AddDays(-7);
-            } else if (filter == "month") {
-                startDate = DateTime.Now.AddMonths(-1);
-            }
+            DateTime startDate = filter switch {
+                "week" => DateTime.Now.AddDays(-7),
+                "month" => DateTime.Now.AddMonths(-1),
+                _ => DateTime.MinValue
+            };
 
-            // Fetch purchases and group by date
+            // Fetch purchases
             var purchases = await _context.Purchases
                 .Where(p => p.VendorId == vendorId && p.PurchaseDate >= startDate)
-                .GroupBy(p => p.PurchaseDate.Date)
-                .Select(g => new {
-                    Date = g.Key,
-                    TotalDebit = g.Sum(p => p.Quantity * p.UnitPrice),
-                    PurchaseIds = g.Select(p => p.PurchaseId).ToList()
+                .Select(p => new LeisureTransactionViewModel {
+                    Date = p.PurchaseDate.Date,
+                    Description = "Purchase",
+                    Debit = p.Quantity * p.UnitPrice,
+                    Credit = 0,
+                    TransactionType = "purchase",
+                    PurchaseIds = new List<int> { p.PurchaseId }
                 })
                 .ToListAsync();
 
-            // Fetch payments and group by date
+            // Fetch payments
             var payments = await _context.Payments
                 .Where(p => p.VendorId == vendorId && p.PaymentDate >= startDate)
-                .GroupBy(p => p.PaymentDate.Date)
-                .Select(g => new {
-                    Date = g.Key,
-                    TotalCredit = g.Sum(p => p.Amount)
+                .Select(p => new LeisureTransactionViewModel {
+                    Date = p.PaymentDate.Date,
+                    Description = "Payment",
+                    Debit = 0,
+                    Credit = p.Amount,
+                    TransactionType = "payment",
+                    PurchaseIds = new List<int>()
                 })
                 .ToListAsync();
 
-            var transactions = new List<LeisureTransactionViewModel>();
+            // Combine and sort transactions by date
+            var transactions = purchases.Concat(payments)
+                .OrderBy(t => t.Date)
+                .ToList();
+
+            // Calculate Running Balance
             decimal runningBalance = vendor.RemainingBalance;
 
-            // Combine purchases & payments by date
-            var groupedTransactions = purchases
-                .Select(p => new LeisureTransactionViewModel {
-                    Date = p.Date,
-                    Description = $"Purchases",
-                    Debit = p.TotalDebit,
-                    Credit = 0,
-                    RemainingBalance = runningBalance += p.TotalDebit,
-                    TransactionType = "purchase",
-                    PurchaseIds = p.PurchaseIds
-                })
-                .Union(payments.Select(pay => new LeisureTransactionViewModel {
-                    Date = pay.Date,
-                    Description = "Payment",
-                    Debit = 0,
-                    Credit = pay.TotalCredit,
-                    RemainingBalance = runningBalance -= pay.TotalCredit,
-                    TransactionType = "payment"
-                }))
-                .GroupBy(t => t.Date)  // Merge purchases & payments on the same date
+            foreach (var transaction in transactions) {
+                if (transaction.TransactionType == "purchase") {
+                    runningBalance += transaction.Debit;
+                } else if (transaction.TransactionType == "payment") {
+                    runningBalance -= transaction.Credit;
+                }
+                transaction.RemainingBalance = runningBalance;
+            }
+
+            // Group transactions by date and remove duplicate descriptions
+            var groupedTransactions = transactions
+                .GroupBy(t => t.Date)
                 .Select(g => new LeisureTransactionViewModel {
                     Date = g.Key,
-                    Description = string.Join(" | ", g.Select(t => t.Description)), // Combine descriptions
+                    Description = string.Join(" | ", g.Select(t => t.Description).Distinct()), // Remove duplicates
                     Debit = g.Sum(t => t.Debit),
                     Credit = g.Sum(t => t.Credit),
-                    RemainingBalance = g.Last().RemainingBalance, // Keep latest balance
+                    RemainingBalance = g.Last().RemainingBalance, // Ensure latest balance is displayed
                     TransactionType = g.Any(t => t.TransactionType == "purchase") ? "purchase" : "payment",
-                    PurchaseIds = g.SelectMany(t => t.PurchaseIds ?? new List<int>()).ToList()
+                    PurchaseIds = g.SelectMany(t => t.PurchaseIds).Distinct().ToList() // Remove duplicate purchase IDs
                 })
                 .OrderBy(t => t.Date)
                 .ToList();
@@ -105,7 +106,6 @@ namespace Phonecase.Controllers {
                 return NotFound("No purchase IDs provided.");
             }
 
-            // Convert comma-separated string into list of integers
             var purchaseIdList = purchaseIds.Split(',')
                                             .Select(id => int.TryParse(id, out int parsedId) ? parsedId : (int?)null)
                                             .Where(id => id.HasValue)

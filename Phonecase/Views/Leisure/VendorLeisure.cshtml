@@ -1,33 +1,61 @@
 ﻿@model List<Phonecase.Controllers.LeisureTransactionViewModel>
 
-<h2>Vendor Transactions</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Debit</th>
-            <th>Credit</th>
-            <th>Remaining Balance</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var transaction in Model) {
-            <tr>
-                <td>@transaction.Date.ToShortDateString()</td>
-                <td>
-                    @if (transaction.TransactionType == "purchase") {
-                        <a href="@Url.Action("PurchaseDetails", "Leisure", new { purchaseIds = string.Join(",", transaction.PurchaseIds) })">
-                            @transaction.Description
-                        </a>
-                    } else {
-                        @transaction.Description
-                    }
-                </td>
-                <td>@(transaction.Debit > 0 ? transaction.Debit.ToString("C") : "-")</td>
-                <td>@(transaction.Credit > 0 ? transaction.Credit.ToString("C") : "-")</td>
-                <td>@transaction.RemainingBalance.ToString("C")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+@{
+    ViewData["Title"] = "Vendor Transactions";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary"><i class="bi bi-journal-text"></i> Vendor Transactions</h2>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-list-ul"></i> Transaction History</h5>
+        </div>
+        <div class="card-body p-4">
+            @if (Model != null && Model.Any()) {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="bi bi-calendar-event"></i> Date</th>
+                                <th><i class="bi bi-card-text"></i> Description</th>
+                                <th><i class="bi bi-arrow-down-circle text-danger"></i> Debit</th>
+                                <th><i class="bi bi-arrow-up-circle text-success"></i> Credit</th>
+                                <th><i class="bi bi-cash-coin"></i> Remaining Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model) {
+                                <tr>
+                                    <td>@transaction.Date.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        @if (transaction.TransactionType == "purchase") {
+                                            <a href="@Url.Action("PurchaseDetails", "Leisure", new { purchaseIds = string.Join(",", transaction.PurchaseIds) })" class="text-decoration-none">
+                                                <i class="bi bi-cart-fill"></i> @transaction.Description
+                                            </a>
+                                        } else {
+                                            <i class="bi bi-credit-card"></i> @transaction.Description
+                                        }
+                                    </td>
+                                    <td class="text-danger fw-bold">@(transaction.Debit > 0 ? transaction.Debit.ToString("C") : "-")</td>
+                                    <td class="text-success fw-bold">@(transaction.Credit > 0 ? transaction.Credit.ToString("C") : "-")</td>
+                                    <td class="fw-bold">@transaction.RemainingBalance.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            } else {
+                <p class="text-muted text-center"><i class="bi bi-exclamation-circle"></i> No transactions found for this vendor.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="@Url.Action("Index", "Leisure")" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Vendor Selection
+    </a>
+</div>
+
+<!-- Include Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
