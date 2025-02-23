@@ -29,8 +29,10 @@
                     <!-- Date Picker -->
                     <div>
                         <label class="form-label fw-bold">Select Date</label>
-                        <input type="date" class="form-control form-control-lg shadow-sm" name="purchaseDate" id="purchaseDate" required>
+                        <input type="date" class="form-control form-control-lg shadow-sm"
+                               name="purchaseDate" id="purchaseDate" required>
                     </div>
+
                 </div>
 
                 <!-- Add Items Section -->
@@ -60,7 +62,7 @@
                             <!-- Unit Price -->
                             <div class="col-md-2">
                                 <label class="form-label fw-bold">Unit Price</label>
-                                <input type="number" step="0.01" class="form-control form-control-lg shadow-sm unit-price" name="unitPrices[]" required>
+                                <input type="number" step="100" class="form-control form-control-lg shadow-sm unit-price" name="unitPrices[]" required>
                             </div>
 
                             <!-- Total Price -->
@@ -88,7 +90,7 @@
                 <div class="mb-4 p-4 bg-light rounded shadow-sm">
                     <h5 class="fw-bold">Purchase Summary</h5>
                     <p class="mb-1">Items: <span id="itemCount">0</span></p>
-                    <p class="mb-0">Subtotal: $<span id="subtotal">0.00</span></p>
+                    <p class="mb-0">Subtotal: Rs.<span id="subtotal">0.00</span></p>
                 </div>
 
                 <!-- Save Purchase Button -->
@@ -151,14 +153,16 @@
             var sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(today.getDate() - 7);
 
-            // Format dates as YYYY-MM-DD
+            // Format dates as YYYY-MM-DD (for compatibility with the date input)
             var todayFormatted = today.toISOString().split('T')[0];
             var sevenDaysAgoFormatted = sevenDaysAgo.toISOString().split('T')[0];
 
-            // Set min and max attributes for the date input
-            $('#purchaseDate').attr('min', sevenDaysAgoFormatted);
-            $('#purchaseDate').attr('max', todayFormatted);
-
+            // Set min, max, and default value attributes for the date input
+            $('#purchaseDate').attr({
+                'min': sevenDaysAgoFormatted,
+                'max': todayFormatted,
+                'value': todayFormatted // Set today's date as default
+            });
             // Add new item
             $("#addItem").on("click", function () {
                 var newItem = $(".item").first().clone();

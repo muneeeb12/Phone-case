@@ -14,7 +14,7 @@
         <div class="card-body">
             <p><strong>Vendor Name:</strong> @vendor.Name</p>
             <p><strong>Contact Info:</strong> @vendor.ContactInfo</p>
-            <p><strong>Total Credit:</strong> $@vendor.TotalCredit</p>
+            <p><strong>Total Credit:</strong> Rs.@vendor.TotalCredit</p>
 
             <a href="@Url.Action("PayVendor", "Vendor", new { vendorId = vendor.VendorId })" class="btn btn-success">
                 <i class="bi bi-cash"></i> Make Payment
@@ -52,8 +52,8 @@ else
                                 <td>@purchase.Product?.Model?.Name</td>
                                 <td>@purchase.Product?.CaseManufacturer?.Name</td>
                                 <td>@purchase.Quantity</td>
-                                <td>$@purchase.UnitPrice</td>
-                                <td>$@(purchase.Quantity * purchase.UnitPrice)</td>
+                                <td>Rs.@purchase.UnitPrice</td>
+                                <td>Rs.@(purchase.Quantity * purchase.UnitPrice)</td>
                                 <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
                             </tr>
                         }
@@ -80,7 +80,7 @@ else
                     <tbody>
                         @foreach (var payment in paymentHistory) {
                             <tr>
-                                <td>$@payment.Amount</td>
+                                <td>Rs.@payment.Amount</td>
                                 <td>@payment.PaymentDate.ToString("yyyy-MM-dd")</td>
                             </tr>
                         }
