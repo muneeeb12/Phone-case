@@ -31,7 +31,7 @@
                             <td>@purchase.Product?.CaseManufacturer?.Name</td>
                             <td>@purchase.Quantity</td>
                             <td>@purchase.UnitPrice.ToString("C")</td>
-                            <td>@(purchase.Quantity * purchase.UnitPrice).ToString("C")</td>
+                            <td>@(purchase.Quantity * purchase.UnitPrice)</td>
                             <td>@purchase.PurchaseDate.ToString("yyyy-MM-dd")</td>
                         </tr>
                     }

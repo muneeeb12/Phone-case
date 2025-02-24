@@ -14,6 +14,7 @@ builder.Services.AddDbContext<PhoneCaseDbContext>(options =>
 builder.Services.AddScoped<IManagementRepository, SqlManagementRepository>();
 builder.Services.AddScoped<IProductRepository, SqlProductRepository>();
 builder.Services.AddScoped<IVendorRepository, SqlVendorRepository>();
+builder.Services.AddScoped<IHistoryRepository, SqlHistoryRepository>();
 
 
 var app = builder.Build();

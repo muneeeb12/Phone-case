@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Phonecase.Data;
 using Phonecase.Models;
+using Phonecase.Repositories;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,22 +10,30 @@ using System.Threading.Tasks;
 namespace Phonecase.Controllers {
     public class RecordController : Controller {
         private readonly PhoneCaseDbContext _context;
+        private readonly IVendorRepository _vendorrepository;
+        private readonly IProductRepository _productrepository;
+        private readonly IManagementRepository _managementrepository;
 
-        public RecordController(PhoneCaseDbContext context) {
+        public RecordController(
+            PhoneCaseDbContext context,
+            IVendorRepository vendorRepository,
+            IProductRepository productRepository,
+            IManagementRepository managementrepository) 
+        {
             _context = context;
+            _vendorrepository = vendorRepository;
+            _productrepository = productRepository;
+            _managementrepository = managementrepository;
+            
         }
 
         // Action to display the record purchase page
         public async Task<IActionResult> Index() {
             // Fetch vendors and products for dropdowns
-            ViewBag.Vendors = await _context.Vendors.ToListAsync();
-            ViewBag.Products = await _context.Products
-                .Include(p => p.Model)
-                .Include(p => p.CaseManufacturer)
-                .ToListAsync();
-            ViewBag.Models = await _context.PhoneModels.ToListAsync();
-            ViewBag.CaseManufacturers = await _context.CaseManufacturers.ToListAsync();
-
+            ViewBag.Vendors = await _vendorrepository.GetVendorAsync();
+            ViewBag.Products = await _productrepository.GetAllAsync();
+            ViewBag.Models = await _managementrepository.GetAllModelAsync();
+            ViewBag.CaseManufacturers = await _managementrepository.GetAllCompanyAsync();
             return View();
         }
 
@@ -40,7 +49,7 @@ namespace Phonecase.Controllers {
                 return BadRequest("Mismatched product, quantity, and price data.");
             }
 
-            var vendor = await _context.Vendors.FindAsync(vendorId);
+            var vendor = await _vendorrepository.GetVendorByIdAsync(vendorId);
             if (vendor == null)
             {
                 return NotFound("Vendor not found.");
@@ -67,14 +76,14 @@ namespace Phonecase.Controllers {
                 };
 
                 totalPurchaseAmount += purchase.Quantity * purchase.UnitPrice;
-                await _context.Purchases.AddAsync(purchase);
+                await _vendorrepository.CreatePurchaseAsync(purchase);
+                //await _context.Purchases.AddAsync(purchase);
             }
 
             // Update vendor's total credit
             vendor.TotalCredit += totalPurchaseAmount;
-            _context.Vendors.Update(vendor);
+            await _vendorrepository.UpdateVendorAsync(vendor);
 
-            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
@@ -82,15 +91,15 @@ namespace Phonecase.Controllers {
         // Action to add a new product
         [HttpPost]
         public async Task<IActionResult> AddProduct(string caseName, int modelId, int caseManufacturerId) {
-            if (!string.IsNullOrEmpty(caseName) && modelId > 0 && caseManufacturerId > 0) {
+            if (!string.IsNullOrEmpty(caseName) && modelId > 0 && caseManufacturerId > 0) 
+            {
                 var product = new Product {
                     CaseName = caseName,
                     ModelId = modelId,
                     CaseManufacturerId = caseManufacturerId
                 };
 
-                await _context.Products.AddAsync(product);
-                await _context.SaveChangesAsync();
+                await _productrepository.CreateProductAsync(product);
 
                 return Json(new { success = true, productId = product.ProductId, caseName = product.CaseName });
             }
@@ -98,3 +107,4 @@ namespace Phonecase.Controllers {
         }
     }
 }
+

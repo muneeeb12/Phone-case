@@ -10,21 +10,46 @@ namespace Phonecase.Repositories {
             _context = dbContext;
         }
 
-        public async Task<Payment> CreatePaymentAsync(Payment payment) {
-            await _context.Payments.AddAsync(payment);
-            await _context.SaveChangesAsync();
-            return payment;
-        }
 
-        public async Task<Vendor> CreateVendorAsync(Vendor vendor) {
+        public async Task<Vendor> CreateVendorAsync(Vendor vendor)
+        {
             await _context.Vendors.AddAsync(vendor);
             await _context.SaveChangesAsync();
             return vendor;
         }
 
-        public async Task<Vendor?> DeleteVendorAsync(int id) {
+        public async Task<IEnumerable<Vendor>> GetVendorAsync()
+        {
+            return await _context.Vendors.ToListAsync();
+        }
+
+        public async Task<Vendor?> GetVendorByIdAsync(int id)
+        {
+            return await _context.Vendors
+                .FirstOrDefaultAsync(v => v.VendorId == id);
+        }
+
+        public async Task<Vendor?> UpdateVendorAsync(Vendor vendor)
+        {
+            var vendorFind = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendor.VendorId);
+            if (vendorFind == null)
+            {
+                return null;
+            }
+
+            vendorFind.Name = vendor.Name;
+            vendorFind.TotalCredit = vendor.TotalCredit; // Fixed typo in property name
+            _context.Vendors.Update(vendor);
+            await _context.SaveChangesAsync();
+            return vendorFind;
+        }
+
+
+        public async Task<Vendor?> DeleteVendorAsync(int id)
+        {
             var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == id);
-            if (vendor == null) {
+            if (vendor == null)
+            {
                 return null;
             }
 
@@ -33,13 +58,28 @@ namespace Phonecase.Repositories {
             return vendor;
         }
 
-        public async Task<IEnumerable<Payment>> GetPaymentHistoryByIdAsync(int id) {
+
+        public async Task<Payment> CreatePaymentAsync(Payment payment) {
+            await _context.Payments.AddAsync(payment);
+            await _context.SaveChangesAsync();
+            return payment;
+        }
+
+        public async Task<IEnumerable<Payment>> GetPaymentHistoryByIdAsync(int id)
+        {
             var paymentHistory = await _context.Payments
                 .Where(p => p.VendorId == id)
                 .OrderByDescending(p => p.PaymentDate)
                 .ToListAsync();
 
             return paymentHistory;
+        }
+
+        public async Task<Purchase> CreatePurchaseAsync(Purchase purchase)
+        {
+            await _context.Purchases.AddAsync(purchase);
+            await _context.SaveChangesAsync();
+            return purchase;
         }
 
         public async Task<IEnumerable<Purchase>> GetPurchaseHistoryByIdAsync(int id) {
@@ -55,26 +95,6 @@ namespace Phonecase.Repositories {
             return purchaseHistory;
         }
 
-        public async Task<IEnumerable<Vendor>> GetVendorAsync() {
-            return await _context.Vendors.ToListAsync();
-        }
-
-        public async Task<Vendor?> GetVendorByIdAsync(int id) {
-            return await _context.Vendors
-                .FirstOrDefaultAsync(v => v.VendorId == id);
-        }
-
-        public async Task<Vendor?> UpdateVendorAsync(Vendor vendor) {
-            var vendorFind = await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendor.VendorId);
-            if (vendorFind == null) {
-                return null;
-            }
-
-            vendorFind.Name = vendor.Name;
-            vendorFind.TotalCredit = vendor.TotalCredit; // Fixed typo in property name
-            await _context.SaveChangesAsync();
-            return vendorFind;
-        }
         public async Task<DateTime?> GetOldestPurchaseDateAsync(int vendorId) {
             return await _context.Purchases
                 .Where(p => p.VendorId == vendorId)
@@ -82,5 +102,7 @@ namespace Phonecase.Repositories {
                 .Select(p => p.PurchaseDate)
                 .FirstOrDefaultAsync();
         }
+
+
     }
 }

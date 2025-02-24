@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Phonecase.Data;
 using Phonecase.Models;
+using Phonecase.Repositories;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,14 +10,21 @@ using System.Threading.Tasks;
 namespace Phonecase.Controllers {
     public class HistoryController : Controller {
         private readonly PhoneCaseDbContext _context;
+        private readonly IVendorRepository _vendorRepository;
+        private readonly IHistoryRepository _historyRepository;
 
-        public HistoryController(PhoneCaseDbContext context) {
+        public HistoryController(
+            PhoneCaseDbContext context,
+            IVendorRepository vendorRepository,
+            IHistoryRepository historyRepository) {
             _context = context;
+            _vendorRepository = vendorRepository;
+            _historyRepository = historyRepository;
         }
 
         // 🟢 HELPER FUNCTION: Fetch Vendors for Dropdown
         private async Task PopulateVendorDropdownAsync() {
-            ViewBag.Vendors = await _context.Vendors.ToListAsync();
+            ViewBag.Vendors = await _vendorRepository.GetVendorAsync();
         }
 
         // 🟢 HELPER FUNCTION: Get Date Filter
@@ -26,11 +34,6 @@ namespace Phonecase.Controllers {
                 "month" => DateTime.Now.AddMonths(-1),
                 _ => DateTime.MinValue
             };
-        }
-
-        // 🟢 HELPER FUNCTION: Fetch Vendor by ID
-        private async Task<Vendor> GetVendorAsync(int vendorId) {
-            return await _context.Vendors.FirstOrDefaultAsync(v => v.VendorId == vendorId);
         }
 
         // 🟢 GET: Show Vendor Selection for Purchase History
@@ -43,19 +46,12 @@ namespace Phonecase.Controllers {
         // 🟢 POST: Fetch Purchase History Based on Vendor & Date Filter
         [HttpPost]
         public async Task<IActionResult> PurchaseHistory(int vendorId, string filter) {
-            var vendor = await GetVendorAsync(vendorId);
+            var vendor = await _vendorRepository.GetVendorByIdAsync(vendorId);
             if (vendor == null) return NotFound("Vendor not found.");
 
             var startDate = GetStartDate(filter);
 
-            var purchaseHistory = await _context.Purchases
-                .Where(p => p.VendorId == vendorId && p.PurchaseDate >= startDate)
-                .Include(p => p.Product)
-                .ThenInclude(m => m.Model)
-                .Include(p => p.Product)
-                .ThenInclude(cm => cm.CaseManufacturer)
-                .OrderByDescending(p => p.PurchaseDate)
-                .ToListAsync();
+            var purchaseHistory = await _historyRepository.GetPurchaseHistoryAsync(vendorId, startDate);     
 
             await PopulateVendorDropdownAsync();
             ViewBag.SelectedVendor = vendorId;
@@ -65,20 +61,9 @@ namespace Phonecase.Controllers {
             return View(purchaseHistory);
         }
 
-        // 🟢 GET: Show Vendor Selection for Payment History
-        public async Task<IActionResult> PaymentHistory() {
-            await PopulateVendorDropdownAsync();
-            ViewBag.PaymentHistory = null; // No history on first load
-            return View();
-        }
         
         public async Task<IActionResult> EditPurchase(int id) {
-            var purchase = await _context.Purchases
-                .Include(p => p.Product)
-                .ThenInclude(m => m.Model)
-                .Include(p => p.Product)
-                .ThenInclude(cm => cm.CaseManufacturer)
-                .FirstOrDefaultAsync(p => p.PurchaseId == id);
+            var purchase = await _historyRepository.GetPurchaseByIdAsync(id);
 
             if (purchase == null) {
                 return NotFound("Purchase not found.");
@@ -86,6 +71,7 @@ namespace Phonecase.Controllers {
 
             return View(purchase);
         }
+
         [HttpPost]
         public async Task<IActionResult> EditPurchase(int id, int quantity, decimal unitPrice) {
             var purchase = await _context.Purchases
@@ -112,29 +98,30 @@ namespace Phonecase.Controllers {
                 }
             }
 
-            // Update purchase details
-            purchase.Quantity = quantity;
-            purchase.UnitPrice = unitPrice;
-
-            await _context.SaveChangesAsync();
+            await _historyRepository.EditPurchaseAsync(id, quantity, unitPrice);
+            
             return RedirectToAction("PurchaseHistory", new { vendorId = purchase.VendorId, filter = "all" });
         }
 
 
+        // 🟢 GET: Show Vendor Selection for Payment History
+        public async Task<IActionResult> PaymentHistory()
+        {
+            await PopulateVendorDropdownAsync();
+            ViewBag.PaymentHistory = null; // No history on first load
+            return View();
+        }
 
 
-// 🟢 POST: Fetch Payment History Based on Vendor & Date Filter
-[HttpPost]
+        // 🟢 POST: Fetch Payment History Based on Vendor & Date Filter
+        [HttpPost]
         public async Task<IActionResult> PaymentHistory(int vendorId, string filter) {
-            var vendor = await GetVendorAsync(vendorId);
+            var vendor = await _vendorRepository.GetVendorByIdAsync(vendorId);
             if (vendor == null) return NotFound("Vendor not found.");
 
             var startDate = GetStartDate(filter);
 
-            var paymentHistory = await _context.Payments
-                .Where(p => p.VendorId == vendorId && p.PaymentDate >= startDate)
-                .OrderByDescending(p => p.PaymentDate)
-                .ToListAsync();
+            var paymentHistory = await _historyRepository.GetPaymentHistoryAsync(vendorId, startDate);
 
             await PopulateVendorDropdownAsync();
             ViewBag.SelectedVendor = vendorId;
@@ -146,9 +133,7 @@ namespace Phonecase.Controllers {
 
         // 🟢 GET: Edit Payment
         public async Task<IActionResult> EditPayment(int id) {
-            var payment = await _context.Payments
-                .Include(p => p.Vendor)
-                .FirstOrDefaultAsync(p => p.PaymentId == id);
+            var payment = await _historyRepository.GetPaymentByIdAsync(id);
 
             if (payment == null) return NotFound("Payment not found.");
             return View(payment);
@@ -157,9 +142,7 @@ namespace Phonecase.Controllers {
         // 🟢 POST: Edit Payment Submission
         [HttpPost]
         public async Task<IActionResult> EditPayment(int id, decimal amount) {
-            var payment = await _context.Payments
-                .Include(p => p.Vendor)
-                .FirstOrDefaultAsync(p => p.PaymentId == id);
+            var payment = await _historyRepository.GetPaymentByIdAsync(id);
 
             if (payment == null) return NotFound("Payment not found.");
 
@@ -169,10 +152,8 @@ namespace Phonecase.Controllers {
             // Adjust vendor credit
             payment.Vendor.TotalCredit += difference;
 
-            // Update payment details
-            payment.Amount = amount;
-
-            await _context.SaveChangesAsync();
+            await _historyRepository.EditPaymentAsync(id, amount);
+            
             return RedirectToAction("PaymentHistory", new { vendorId = payment.VendorId, filter = "all" });
         }
 
